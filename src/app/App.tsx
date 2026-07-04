@@ -1,7 +1,9 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { RewardCeremony } from "@/features/rewards/RewardCeremony";
+import { pageVariants } from "@/lib/motion";
 import { APP_ROUTES } from "./routes";
 import { Providers } from "./providers";
 
@@ -14,6 +16,22 @@ function ScrollToTop() {
   return null;
 }
 
+/** 页面级过渡：淡入 + 轻微上移，统一 spring 手感。 */
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="enter" exit="exit">
+        <Routes location={location}>
+          {APP_ROUTES.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   return (
     <Providers>
@@ -21,11 +39,7 @@ export default function App() {
       <HashRouter>
         <ScrollToTop />
         <AppShell>
-          <Routes>
-            {APP_ROUTES.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element} />
-            ))}
-          </Routes>
+          <AnimatedRoutes />
         </AppShell>
         <RewardCeremony />
       </HashRouter>

@@ -1,3 +1,7 @@
+import { motion, useReducedMotion } from "framer-motion";
+import { SPRING_GENTLE } from "@/lib/motion";
+
+/** spring 填充的进度条，带一道缓慢扫过的高光。 */
 export function ProgressBar({
   value,
   max,
@@ -11,6 +15,7 @@ export function ProgressBar({
   className?: string;
   label?: string;
 }) {
+  const reduced = useReducedMotion();
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   const toneClass = {
     ember: "bg-gradient-to-r from-ember-light to-ember",
@@ -27,7 +32,19 @@ export function ProgressBar({
       aria-valuemax={max}
       aria-label={label}
     >
-      <div className={`h-full rounded-full transition-all duration-500 ${toneClass}`} style={{ width: `${pct}%` }} />
+      <motion.div
+        className={`relative h-full rounded-full overflow-hidden ${toneClass}`}
+        initial={false}
+        animate={{ width: `${pct}%` }}
+        transition={reduced ? { duration: 0 } : SPRING_GENTLE}
+      >
+        {pct > 0 && !reduced && (
+          <span
+            className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/35 to-transparent bg-[length:200%_100%]"
+            aria-hidden="true"
+          />
+        )}
+      </motion.div>
     </div>
   );
 }

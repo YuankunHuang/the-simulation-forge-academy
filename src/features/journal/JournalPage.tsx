@@ -145,6 +145,7 @@ export function JournalPage() {
                     </Badge>
                     {quest && <span className="text-xs text-ink-faint">{quest.code} · {quest.title}</span>}
                     <span className="text-xs text-ink-faint ml-auto">{formatDateZh(entry.date)}</span>
+                    {entry.kind === "boss_defense" && <CopyButton text={entry.text} label="复制" />}
                   </div>
                   <p className="text-sm text-ink whitespace-pre-wrap">{entry.text}</p>
                 </Card>
@@ -162,7 +163,7 @@ export function JournalPage() {
           <EmptyState
             icon="flame"
             title="还没有冲刺回顾"
-            description="在炉火大厅选择『深度冲刺』模式，连续完成任务后结束冲刺，回顾会出现在这里。"
+            description="在顶部状态条的火焰弹层里开启『深度冲刺』，连续完成任务后结束冲刺，回顾会出现在这里。"
           />
         ) : (
           <div className="space-y-4">

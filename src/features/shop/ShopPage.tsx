@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatPill } from "@/components/ui/StatPill";
+import { VaultTabs } from "@/features/evidence/VaultTabs";
 import { formatNumber } from "@/lib/formatting";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { BonusDungeon } from "@/types/domain";
@@ -31,6 +32,8 @@ export function ShopPage() {
         </div>
         <StatPill icon="coin" value={gold} label="金币" tone="gold" />
       </header>
+
+      <VaultTabs />
 
       <p className="rounded-xl bg-cream-200/60 border border-wood-light/25 px-4 py-2.5 text-xs text-wood-dark">
         秘境永远不阻塞主线——它们只是学有余力时的奖励副本。

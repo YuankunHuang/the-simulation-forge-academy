@@ -4,6 +4,7 @@ import { SKILLS_BY_TREE, SKILL_TREES } from "@/content/skills";
 import { Icon } from "@/components/icons";
 import { Card } from "@/components/ui/Card";
 import { StatPill } from "@/components/ui/StatPill";
+import { SPRING_BOUNCY } from "@/lib/motion";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { SkillNode } from "@/types/domain";
 
@@ -44,13 +45,25 @@ function SkillNodeCard({ node, accent }: { node: SkillNode; accent: string }) {
 
   if (state === "unlocked") {
     return (
-      <div className={`rounded-xl border-2 p-3 ${ACCENT_RING[accent]} shadow-soft`}>
+      <motion.div
+        initial={{ scale: 0.82, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={SPRING_BOUNCY}
+        className={`relative rounded-xl border-2 p-3 ${ACCENT_RING[accent]} shadow-soft`}
+      >
+        <motion.span
+          initial={{ scale: 1, opacity: 0.6 }}
+          animate={{ scale: 1.35, opacity: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="pointer-events-none absolute inset-0 rounded-xl border-2 border-current"
+          aria-hidden="true"
+        />
         <p className="flex items-center gap-1.5 text-sm font-bold">
           <Icon name="check" size={14} />
           {node.name}
         </p>
         <p className="mt-1 text-xs opacity-80">{node.description}</p>
-      </div>
+      </motion.div>
     );
   }
 
@@ -59,7 +72,8 @@ function SkillNodeCard({ node, accent }: { node: SkillNode; accent: string }) {
     return (
       <motion.button
         type="button"
-        whileTap={{ scale: 0.97 }}
+        whileHover={affordable ? { y: -2 } : undefined}
+        whileTap={{ scale: 0.95 }}
         onClick={() => unlockSkill(node.id)}
         disabled={!affordable}
         className={`rounded-xl border-2 border-dashed p-3 text-left transition-all w-full ${

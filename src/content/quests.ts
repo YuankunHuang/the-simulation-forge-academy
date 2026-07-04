@@ -765,6 +765,35 @@ export const QUESTS: Quest[] = [
     nextRisk: "契约建立后，别急着逐个传 Agent——下一步的重点恰恰是批处理。",
     unlocks: ["m5"],
     estimate: "60–90 分钟",
+    conceptMap: [
+      "blittable 类型",
+      "NblAgent (C++)",
+      "Agent struct (C#)",
+      "StructLayout.Sequential",
+      "static_assert / size check",
+      "布局契约文档",
+    ],
+    filesToCreate: [
+      "native/include/nbl_api.h（NblAgent 定义）",
+      "native/src 里的 static_assert 校验块",
+      "unity 侧 Agent.cs（[StructLayout(LayoutKind.Sequential)]）",
+      "C# 布局校验（Marshal.SizeOf 断言）",
+      "docs/INTEROP_DESIGN.md 的 blittable 契约章节",
+    ],
+    steps: [
+      "在 C++ 定义 NblAgent：position、velocity 等纯 POD 字段。",
+      "用 static_assert 锁定 sizeof(NblAgent) 与关键字段 offsetof。",
+      "在 C# 定义完全同序同型的 Agent struct，标注 LayoutKind.Sequential。",
+      "在 C# 启动时断言 Marshal.SizeOf<Agent>() 与 native 侧一致（可通过导出 NblGetAgentSize 对表）。",
+      "把『什么能进边界 struct、什么不能』写进 INTEROP_DESIGN.md。",
+      "提交 commit，附上双侧断言的证据。",
+    ],
+    debuggingNotes: [
+      "两侧 size 不一致：先查字段顺序与类型宽度，再查对齐/padding——不要急着上 Pack=1。",
+      "Marshal.SizeOf 与 sizeof 不同：struct 可能不是 blittable（含 bool/char/引用类型时封送规则改变）。",
+      "导出一个 NblGetAgentSize() 函数，让运行时对表代替猜测。",
+    ],
+    publicShowcaseSeed: "双侧编译期断言（static_assert + C# size check）的对照截图，是『把契约写进编译器』这篇博客的核心素材。",
   },
 
   // ------------------------------------------------------------
@@ -829,6 +858,36 @@ export const QUESTS: Quest[] = [
     nextRisk: "下一步要故意写『坏代码』（per-agent 反模式）。记住它存在的唯一意义是对照。",
     unlocks: ["m6"],
     estimate: "90–150 分钟",
+    conceptMap: [
+      "NblAgent 数组",
+      "NblStepAgents(ctx, agents*, count, dt)",
+      "NativeArray / pinned 内存",
+      "单次 P/Invoke",
+      "checksum 验证",
+      "最简可视化",
+    ],
+    filesToCreate: [
+      "nbl_api.h：NblStepAgents 声明",
+      "native/src/nbl_simulation.cpp（批量步进实现）",
+      "C# NativeBoundary 新增声明与 wrapper",
+      "AgentSwarmDemo.cs（100 agents 最简可视化）",
+      "checksum 计算工具（两侧或 C# 侧）",
+    ],
+    steps: [
+      "在 C ABI 声明 NblStepAgents(context, agents, count, dt)。",
+      "C++ 内部用 std::span 包住传入内存，写朴素的位置积分。",
+      "C# 用 NativeArray<Agent> 或 GCHandle pin 数组，一次调用传整批。",
+      "初始化 100 个 agent（固定 seed），步进若干帧。",
+      "计算 checksum（如位置分量求和）并与预期核对。",
+      "在 Unity 里做最简可视化（点/方块即可，别做美术）。",
+      "确认每帧 native 调用次数 == 1，提交证据。",
+    ],
+    debuggingNotes: [
+      "数据错乱：回 M4 检查布局契约，八成是字段顺序或对齐漂移。",
+      "偶发崩溃：确认数组在调用期间被 pin 住，GC 不会移动它。",
+      "count 参数用元素数还是字节数？在头文件注释里写死约定。",
+    ],
+    publicShowcaseSeed: "100 agents 被单次调用驱动的运动 GIF + calls/frame=1 的 HUD 角标，是 README 里最有说服力的第一张动图。",
   },
 
   // ------------------------------------------------------------
@@ -891,6 +950,36 @@ export const QUESTS: Quest[] = [
     nextRisk: "有了正反两个样本，下一步必须让测量方法本身经得起质疑（M7）。",
     unlocks: ["m7"],
     estimate: "60–90 分钟",
+    conceptMap: [
+      "NblStepSingleAgent",
+      "每帧 N 次边界穿越",
+      "封送/栈切换固定成本",
+      "calls/frame 计数器",
+      "输出一致性（容差）",
+      "ANTI-PATTERN 标注",
+    ],
+    filesToCreate: [
+      "nbl_api.h：NblStepSingleAgent 声明",
+      "native 单实体步进实现（与批量共用核心逻辑）",
+      "C# per-agent 模式驱动（每帧循环 N 次 P/Invoke）",
+      "calls/frame 计数显示",
+      "两模式输出对照脚本/记录",
+    ],
+    steps: [
+      "声明 NblStepSingleAgent(context, agent*, dt)。",
+      "native 内部复用与批量路径完全相同的积分逻辑（保证可对照）。",
+      "C# 每帧对每个 agent 单独调用一次——故意的。",
+      "统计并显示每帧 native 调用次数（应 == agent 数）。",
+      "相同 seed 相同输入，验证输出与批量模式在容差内一致。",
+      "在 UI 上明确标注 ANTI-PATTERN，防止未来的自己误用。",
+      "提交对照记录。",
+    ],
+    debuggingNotes: [
+      "两模式输出不一致：先确认共用同一份核心积分代码与同一 seed，再查 dt 累积顺序。",
+      "浮点容差：用 epsilon 比较而不是完全相等，容差值写进记录。",
+      "计数器归零时机放在帧首，别把初始化调用算进去。",
+    ],
+    publicShowcaseSeed: "『calls/frame = 5000』和『calls/frame = 1』两张 HUD 截图并排，是反模式叙事最直观的一图流。",
   },
 
   // ------------------------------------------------------------
@@ -964,6 +1053,40 @@ export const QUESTS: Quest[] = [
     nextRisk: "在没有 Burst 基线之前，任何'native 更快'的结论都是提前庆祝。",
     unlocks: ["m8"],
     estimate: "120–180 分钟",
+    conceptMap: [
+      "固定 seed",
+      "warmup 剔除",
+      "测量帧窗口",
+      "median / p95",
+      "GC alloc 记录",
+      "运行时 HUD",
+      "CSV/JSON 导出",
+    ],
+    filesToCreate: [
+      "BenchmarkRunner.cs（场景/模式/规模编排）",
+      "FrameStats.cs（采样、median/p95 统计）",
+      "GC alloc 采样（ProfilerRecorder）",
+      "BenchmarkHud.cs（运行时面板）",
+      "CSV/JSON 导出器",
+      "docs/BENCHMARK_METHODOLOGY.md 正文",
+    ],
+    steps: [
+      "定义基准配置：模式 × agent 规模（1k/5k/10k）× 帧窗口。",
+      "所有模式共用同一个固定 seed 的初始化。",
+      "跳过前 N 帧 warmup，再采样 M 帧。",
+      "对 ms/frame 计算 median 与 p95（排序取分位，别用平均）。",
+      "用 ProfilerRecorder 记录 GC alloc/frame。",
+      "HUD 显示：mode、agent count、calls/frame、ms/frame、GC alloc、checksum。",
+      "把每轮结果写出 CSV 或 JSON。",
+      "把 seed/warmup/窗口/统计口径/渲染隔离写进 BENCHMARK_METHODOLOGY.md。",
+      "提交导出样本与方法论文档。",
+    ],
+    debuggingNotes: [
+      "数字抖动大：检查是否混入了渲染成本——把仿真计时单独用 Stopwatch 包住。",
+      "GC alloc 恒为 0 却不敢信：故意插入一次分配验证采样器工作。",
+      "vsync 会把 ms/frame 钳到刷新率：测量窗口内关掉或用仿真段计时。",
+    ],
+    publicShowcaseSeed: "HUD 截图 + CSV 前几行 + 方法论要点，凑成第一篇『我如何测量边界成本』的 LinkedIn/博客主体。",
   },
 
   // ------------------------------------------------------------
@@ -1028,6 +1151,35 @@ export const QUESTS: Quest[] = [
     nextRisk: "四种模式齐备，Boss 之门在等你把方法论讲成一个 90 秒的故事。",
     unlocks: ["boss_benchmark"],
     estimate: "90–150 分钟",
+    conceptMap: [
+      "IJob / IJobFor",
+      "[BurstCompile]",
+      "NativeArray 数据通道",
+      "输出 checksum 校验",
+      "并行度对等说明",
+      "公平性声明",
+    ],
+    filesToCreate: [
+      "AgentStepJob.cs（Burst 编译的步进 Job）",
+      "Burst 模式接入 BenchmarkRunner",
+      "输出一致性校验记录",
+      "README『这不是 C++ 崇拜』段落",
+    ],
+    steps: [
+      "用 IJobFor + [BurstCompile] 实现与 native 相同的积分逻辑。",
+      "数据放 NativeArray<Agent>，避免任何托管分配。",
+      "在 Burst Inspector 确认编译生效（看到向量化汇编）。",
+      "相同 seed 下校验输出与其他模式一致。",
+      "把 Burst 模式纳入基准，重新导出报告。",
+      "在 README 写下公平性声明：单线程对单线程，或明确标注并行度差异。",
+      "提交报告与 README 段落。",
+    ],
+    debuggingNotes: [
+      "Burst 悄悄回退到 Mono：检查 Job 里是否用了托管类型或异常路径。",
+      "Burst 比 native 快不奇怪——先检查两侧优化级别与并行度是否对等，再下结论。",
+      "结果差距过大时，先看数据搬运（复制 vs 原地）是否公平。",
+    ],
+    publicShowcaseSeed: "四模式对比表（managed / Burst / native per-call / native batched）本身就是整个实验室 thesis 的证据核心。",
   },
 
   // ------------------------------------------------------------
@@ -1077,7 +1229,7 @@ export const QUESTS: Quest[] = [
       },
     ],
     skills: ["skill_resume_bullet"],
-    artifactIds: [],
+    artifactIds: ["art_boss_benchmark"],
     rewards: { xp: 400, gold: 200, skillPoints: 1, reputation: 40, insight: 2 },
     aiPrompt: forgePrompt(
       "BOSS",
@@ -1090,6 +1242,32 @@ export const QUESTS: Quest[] = [
     nextRisk: "档案馆的内存布局实验容易发散。记住每个实验都要产出可对比的表格。",
     unlocks: ["m9"],
     estimate: "45–60 分钟",
+    conceptMap: [
+      "四模式基准导出",
+      "方法论答辩",
+      "90 秒讲解",
+      "首篇公开草稿",
+      "平原试炼之印",
+      "Layout Archives 开启",
+    ],
+    filesToCreate: [
+      "不写新代码。",
+      "基准导出确认（路径或关键数据）。",
+      "90 秒方法论讲解文本。",
+      "首篇 LinkedIn/GitHub 展示草稿。",
+    ],
+    steps: [
+      "汇总四模式在 5k agents 下的 median/p95 数据。",
+      "让 AI 扮演性能面试官，围绕 seed/warmup/分位数/渲染隔离/GC 测量追问你。",
+      "把回答打磨成 90 秒版本写下来。",
+      "起草第一篇公开展示（聚焦『native 不一定更快』这一个反直觉结论）。",
+      "提交答辩，铸成平原试炼之印。",
+    ],
+    debuggingNotes: [
+      "讲解超过 90 秒：砍掉工具细节，只保留方法论决策与数据结论。",
+      "草稿写不动：从那张四模式对比表开始，让数据先说话。",
+    ],
+    publicShowcaseSeed: "这是 Act I 公开 demo 切片（Agent Swarm Boundary Benchmark）的发布时刻——第一条真正建议公开的 LinkedIn/GitHub 内容。",
   },
 
   // ------------------------------------------------------------
@@ -1150,6 +1328,35 @@ export const QUESTS: Quest[] = [
     nextRisk: "布局之后是失败处理。别把'能跑'当作'安全'。",
     unlocks: ["boss_layout"],
     estimate: "120–180 分钟",
+    conceptMap: [
+      "AoS vs SoA",
+      "natural vs packed（Pack=1）",
+      "对齐与 padding",
+      "copy 路径 vs pinned pointer 路径",
+      "借用指针规则",
+      "布局报告",
+    ],
+    filesToCreate: [
+      "SoA 变体的数据定义与步进（双侧一致）",
+      "packed（Pack=1）对照 struct",
+      "sizeof/offset 报告生成（两侧打印对表）",
+      "pointer 路径的约束文档",
+      "docs/layout-report.md（对比结论）",
+    ],
+    steps: [
+      "实现 SoA 变体：位置/速度拆成独立数组，双侧同步修改。",
+      "定义 packed 对照组，打印两侧 sizeof/offset 表。",
+      "对比 copy 路径与 pinned pointer 路径的行为与约束。",
+      "写死规则：native 不得在调用结束后保留借来的 Unity 指针。",
+      "把全部数据整理成 layout-report.md 的对比表格。",
+      "提交报告与关键结论。",
+    ],
+    debuggingNotes: [
+      "SoA 结果不对：多半是某一侧忘了改布局——用 checksum 快速定位。",
+      "packed 更慢不要惊讶：未对齐访问的代价因平台而异，记录下来就是结论。",
+      "pinned 指针崩溃：检查 GCHandle 生命周期是否覆盖整个 native 调用。",
+    ],
+    publicShowcaseSeed: "layout-report.md 的对比表（尤其 Pack=1 何时更慢的反直觉数据）是硬核博客《数据的形状决定它旅行的速度》的地基。",
   },
 
   // ------------------------------------------------------------
@@ -1183,7 +1390,7 @@ export const QUESTS: Quest[] = [
       },
     ],
     skills: [],
-    artifactIds: [],
+    artifactIds: ["art_boss_layout"],
     rewards: { xp: 300, gold: 140, skillPoints: 0, reputation: 20, insight: 2 },
     aiPrompt: forgePrompt(
       "BOSS",
@@ -1196,6 +1403,16 @@ export const QUESTS: Quest[] = [
     nextRisk: "诊所里的失败注入需要耐心。安全边界的价值恰恰在'不崩溃'这种看不见的地方。",
     unlocks: ["m10"],
     estimate: "20–30 分钟",
+    conceptMap: ["布局报告", "AoS/SoA 判断标准", "60 秒答辩", "契约之印"],
+    filesToCreate: ["不写新代码。", "布局报告位置确认。", "AoS/SoA 选择标准的 60 秒回答。"],
+    steps: [
+      "重读 layout-report.md 的对比表。",
+      "不看报告，口头回答：什么时候选 AoS，什么时候选 SoA？",
+      "把回答压缩到 60 秒并写下来（要判断标准，不要术语堆砌）。",
+      "提交答辩。",
+    ],
+    debuggingNotes: ["回答只剩术语时，强制自己以『如果访问模式是 X，我选 Y，因为 Z』的句式重写。"],
+    publicShowcaseSeed: "60 秒 AoS/SoA 判断标准是技术面试的高频弹药，也可以浓缩成一条高质量技术短帖。",
   },
 
   // ------------------------------------------------------------
@@ -1256,6 +1473,39 @@ export const QUESTS: Quest[] = [
     nextRisk: "安全完成后，警惕'再加一个功能'的冲动——下一步是打包，不是扩展。",
     unlocks: ["boss_safety"],
     estimate: "120–180 分钟",
+    conceptMap: [
+      "NblResultCode 枚举",
+      "全 API 返回码化",
+      "NblGetLastError",
+      "边界 try/catch",
+      "日志回调注册",
+      "失败注入测试",
+      "安全边界文档",
+    ],
+    filesToCreate: [
+      "nbl_api.h：NblResultCode + 所有 API 签名改造",
+      "native 侧统一 catch 边界与 LastError 存储",
+      "日志回调注册 API（函数指针）",
+      "C# 侧错误检查 wrapper",
+      "失败注入测试（无效 handle / buffer 太小 / 双重销毁）",
+      "docs 安全边界与局限声明",
+    ],
+    steps: [
+      "设计 NblResultCode：Ok、InvalidHandle、InvalidArgument、BufferTooSmall、InternalError。",
+      "把所有导出 API 改为返回 result code，输出参数走指针。",
+      "实现 NblGetLastError（线程局部或 context 局部的详细信息）。",
+      "在每个导出函数体包统一 try/catch，把异常转成 InternalError。",
+      "提供日志回调注册，让 native 日志流进 Unity Console。",
+      "写失败注入测试：传空句柄、传小 buffer、双重销毁——逐一验证可恢复。",
+      "在文档写明：内存损坏仍可能使进程崩溃，wrapper 的保证有边界。",
+      "提交测试记录与文档。",
+    ],
+    debuggingNotes: [
+      "异常还是穿出去了：检查是否有 noexcept 路径漏包，或回调里抛了托管异常。",
+      "LastError 被覆盖：确认存储粒度（全局 vs per-context vs 线程局部）并写进文档。",
+      "日志回调崩溃：managed 委托要用 GCHandle 钉住，防止被回收。",
+    ],
+    publicShowcaseSeed: "失败注入清单 + 『wrapper 能保证什么、不能保证什么』声明，是《生产级 native wrapper 与 demo 的分水岭》一文的骨架。",
   },
 
   // ------------------------------------------------------------
@@ -1290,7 +1540,7 @@ export const QUESTS: Quest[] = [
       },
     ],
     skills: [],
-    artifactIds: [],
+    artifactIds: ["art_boss_safety"],
     rewards: { xp: 300, gold: 140, skillPoints: 0, reputation: 20, insight: 2 },
     aiPrompt: forgePrompt(
       "BOSS",
@@ -1303,6 +1553,16 @@ export const QUESTS: Quest[] = [
     nextRisk: "打包是面向他人的工程。港口的标准比你想象的更严格。",
     unlocks: ["m11"],
     estimate: "20–30 分钟",
+    conceptMap: ["失败注入实验清单", "可恢复 vs 不可恢复", "90 秒答辩", "失败协议之印"],
+    filesToCreate: ["不写新代码。", "失败注入实验总结。", "90 秒安全边界答辩文本。"],
+    steps: [
+      "列出全部注入过的失败与系统反应。",
+      "划出边界：哪些失败可恢复（返回码），哪些不可（进程级）。",
+      "让 AI 追问你 result code / LastError / 异常边界的设计取舍。",
+      "写下 90 秒答辩版本，提交。",
+    ],
+    debuggingNotes: ["答辩发虚的部分回 M10 补一个注入实验——亲手崩过的地方讲起来才有底气。"],
+    publicShowcaseSeed: "『我亲手治愈的一次失败』的 STAR 化版本，是系统工程面试里最值钱的故事模板。",
   },
 
   // ------------------------------------------------------------
@@ -1363,6 +1623,38 @@ export const QUESTS: Quest[] = [
     nextRisk: "移动端之门的构建链路更长。给自己预留完整的一块时间，不要碎片化推进。",
     unlocks: ["boss_package"],
     estimate: "120–180 分钟",
+    conceptMap: [
+      "package.json",
+      "Runtime / Editor asmdef",
+      "Samples~ 目录",
+      "平台插件放置",
+      "全新工程验证",
+      "quickstart 文档",
+    ],
+    filesToCreate: [
+      "com.yourname.nativeboundary/package.json",
+      "Runtime/ + Runtime asmdef",
+      "Editor/ + Editor asmdef（引用 Runtime）",
+      "Samples~/HelloNative 与 Samples~/AgentSwarmBenchmark",
+      "Plugins 按平台放置的 native 库",
+      "包 README（quickstart 面向零上下文用户）",
+    ],
+    steps: [
+      "创建包目录与 package.json（name/version/displayName/unity 版本）。",
+      "把 runtime 代码移入 Runtime/，配 asmdef。",
+      "Editor 代码移入 Editor/，asmdef 只在 Editor 平台并引用 Runtime。",
+      "把 HelloNative 与 AgentSwarmBenchmark 整理进 Samples~（注意波浪号）。",
+      "native 库按平台放进包内 Plugins 结构并配导入设置。",
+      "写 quickstart：从 import 到跑通 sample 的每一步，不省略『显而易见』。",
+      "开一个全新 Unity 工程，用 file: 或 git url 导入验证。",
+      "提交包结构截图与全新工程验证记录。",
+    ],
+    debuggingNotes: [
+      "Samples 不显示：目录名必须是 Samples~ 且在 package.json 里声明 samples 数组。",
+      "asmdef 循环引用：Editor 引 Runtime 单向，永远不要反向。",
+      "全新工程里 DllNotFound：包内插件导入设置不会自动继承，逐平台检查。",
+    ],
+    publicShowcaseSeed: "『任何人 import 就能跑』的 quickstart GIF 是 README 的门面，也是 Runtime Tooling 岗位叙事的核心画面。",
   },
 
   // ------------------------------------------------------------
@@ -1396,7 +1688,7 @@ export const QUESTS: Quest[] = [
       },
     ],
     skills: [],
-    artifactIds: [],
+    artifactIds: ["art_boss_package"],
     rewards: { xp: 350, gold: 160, skillPoints: 0, reputation: 30, insight: 1 },
     aiPrompt: forgePrompt(
       "BOSS",
@@ -1409,6 +1701,16 @@ export const QUESTS: Quest[] = [
     nextRisk: "Android 构建的失败往往在链路末端才暴露。记录每一步，失败也是里程碑。",
     unlocks: ["m12"],
     estimate: "30–45 分钟",
+    conceptMap: ["用户视角切换", "全新工程验证", "quickstart 终稿", "港口放行印"],
+    filesToCreate: ["不写新代码。", "全新工程运行 sample 的截图。", "quickstart 最终稿。"],
+    steps: [
+      "让 AI 以零上下文新用户身份逐行审查 quickstart。",
+      "修掉每一个『其实需要背景知识』的坑。",
+      "在全新工程重跑一遍 import → sample 流程确认。",
+      "提交截图与终稿。",
+    ],
+    debuggingNotes: ["新用户视角最难的是遗忘自己知道的东西——让 AI 扮演比自己硬想有效。"],
+    publicShowcaseSeed: "quickstart GIF + 『10 分钟跑通』的承诺，是包发布帖的最佳开场。",
   },
 
   // ------------------------------------------------------------
@@ -1474,6 +1776,35 @@ export const QUESTS: Quest[] = [
     nextRisk: "主线到此已完整。观测台是可选的甜点——别让甜点变成新的主食。",
     unlocks: ["boss_mobile"],
     estimate: "120–240 分钟",
+    conceptMap: [
+      "NDK 工具链",
+      "CMake 交叉编译",
+      "arm64-v8a ABI 目录",
+      "插件导入设置（Android/ARM64）",
+      "IL2CPP development build",
+      "真机验证",
+    ],
+    filesToCreate: [
+      "native 交叉编译脚本或 CMake preset（NDK toolchain file）",
+      "libnbl.so（arm64-v8a 产物）",
+      "Unity 插件目录 Android/arm64-v8a 放置 + 导入设置",
+      "docs/ANDROID_IL2CPP_NOTES.md（链路、坑点、修复路径）",
+    ],
+    steps: [
+      "用 NDK toolchain file 配置 CMake 交叉编译（ANDROID_ABI=arm64-v8a）。",
+      "产出 libnbl.so，确认目标架构（file / llvm-readelf 验证）。",
+      "放进 Unity 的 Android/arm64-v8a 插件路径并配置导入设置。",
+      "切 Android + IL2CPP，跑 development build。",
+      "真机或模拟器上验证版本函数调用。",
+      "无论成败，把每一步与阻塞点写进 ANDROID_IL2CPP_NOTES.md。",
+      "提交构建记录（失败日志同样是合格证据）。",
+    ],
+    debuggingNotes: [
+      "真机 DllNotFound：九成是 ABI 目录或导入设置——先看 APK 里 .so 是否真的被打进去了（解压确认）。",
+      "IL2CPP 链接期报符号错误：确认 DllImport 名称与导出完全一致，IL2CPP 在构建期做静态检查。",
+      "Editor 能跑真机崩：检查 stripping 设置与 [MonoPInvokeCallback]（如有回调）。",
+    ],
+    publicShowcaseSeed: "『桌面到 Android IL2CPP 的完整链路笔记』——含失败与修复路径——是移动 Unity 圈里稀缺且高可信的分享题材。",
   },
 
   // ------------------------------------------------------------
@@ -1507,7 +1838,7 @@ export const QUESTS: Quest[] = [
       },
     ],
     skills: [],
-    artifactIds: [],
+    artifactIds: ["art_boss_mobile"],
     rewards: { xp: 350, gold: 160, skillPoints: 0, reputation: 30, insight: 2 },
     aiPrompt: forgePrompt(
       "BOSS",
@@ -1520,6 +1851,16 @@ export const QUESTS: Quest[] = [
     nextRisk: "Act II 的确定性内核在迷雾后等你。休整、展示、然后启程。",
     unlocks: ["m13"],
     estimate: "20–30 分钟",
+    conceptMap: ["IL2CPP 构建结果", "阻塞点与修复路径", "STAR 故事", "ARM64 通行印", "Act I 闭幕"],
+    filesToCreate: ["不写新代码。", "构建结果记录（成或败）。", "阻塞点与修复路径讲解。", "可选：STAR 面试故事。"],
+    steps: [
+      "整理 M12 的完整链路记录（工具链 → 交叉编译 → 导入设置 → IL2CPP → 真机）。",
+      "把最大的阻塞点讲成『遇到什么 / 为什么 / 怎么解』。",
+      "让 AI 帮你把经历整理成 STAR 面试故事。",
+      "提交答辩，Act I 闭幕。",
+    ],
+    debuggingNotes: ["构建失败也能过门——门考的是记录与理解，不是运气。"],
+    publicShowcaseSeed: "从这里开始，简历可以写下『Unity/C++ Boundary & Runtime Tooling』——这枚印是整幕旅程的落款。",
   },
 
   // ------------------------------------------------------------
@@ -1580,6 +1921,29 @@ export const QUESTS: Quest[] = [
     nextRisk: "Act I 全部完成。下一幕的入口将在学院公告中开启。",
     unlocks: [],
     estimate: "120–180 分钟",
+    conceptMap: [
+      "扩展点评估（XR vs render-thread）",
+      "最小 demo",
+      "局限性文档",
+      "架构边界不动",
+    ],
+    filesToCreate: [
+      "二选一：XR 位姿诊断 HUD 或 IssuePluginEvent 最小示例",
+      "docs 局限性说明（能做什么 / 不能做什么）",
+      "可选：截图/GIF",
+    ],
+    steps: [
+      "先评估：哪个方向与你的长期目标更相关（让 AI 帮你对比）。",
+      "实现最小 demo，严禁触碰核心架构。",
+      "写局限性文档：这个 demo 的边界在哪里。",
+      "可选：截一张值得展示的图。",
+      "提交证据，为 Act I 画上句号。",
+    ],
+    debuggingNotes: [
+      "发现自己在重构核心：立即停手——这正是本任务考验的自律。",
+      "render-thread 事件不触发：确认在 CommandBuffer / GL.IssuePluginEvent 的正确时机注册。",
+    ],
+    publicShowcaseSeed: "『核心稳固之后我才允许自己碰 XR』的克制叙事，本身就是资深工程师 signature 的展示素材。",
   },
 
   // ============================================================

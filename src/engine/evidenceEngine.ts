@@ -38,6 +38,40 @@ export function isEvidenceFieldValid(req: EvidenceRequirement, raw: string | und
   return isFieldValid(req, raw);
 }
 
+/**
+ * Boss 答辩：单题演练 Prompt。
+ * 让 AI 扮演面试官只围绕这一题追问——先听玩家说，再暴露模糊之处。
+ */
+export function defenseDrillPrompt(quest: Quest, req: EvidenceRequirement): string {
+  return `你是一位友善但严格的系统工程面试官。现在只围绕一个问题对我进行答辩演练。
+
+背景：这是我的项目 Unity Native Boundary Lab 的 Boss 答辩（${quest.code} — ${quest.title}）中的一题。
+
+本题：${req.label}
+
+演练流程：
+1. 先让我完整陈述我的回答，不要打断，也不要先替我回答。
+2. 针对我的回答提出 2-3 个追问，暴露模糊或含混之处。
+3. 指出我遗漏的关键机制或误用的术语。
+4. 最后给出一个 60-90 秒口头版本的改进示范。
+
+保持严格但不刻薄。开始吧，请先说：「请陈述你的回答。」`;
+}
+
+/**
+ * 把 Boss 答辩的全部作答拼装成一份可存档/可复制的面试防线文本。
+ * store 写篝火日志与工坊「复制完整答辩」共用此函数。
+ */
+export function assembleDefenseText(quest: Quest, fields: Record<string, string>): string {
+  return quest.evidenceRequired
+    .map((req) => {
+      const value = (fields[req.id] ?? "").trim();
+      return value ? `【${req.label}】\n${value}` : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 export interface ShowcasePrompts {
   linkedin: string;
   blog: string;

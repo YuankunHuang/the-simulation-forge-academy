@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
-import { HallPage } from "@/features/hall/HallPage";
+import { Navigate } from "react-router-dom";
 import { JournalPage } from "@/features/journal/JournalPage";
-import { MapPage } from "@/features/map/MapPage";
+import { PathPage } from "@/features/path/PathPage";
 import { QuestPage } from "@/features/quests/QuestPage";
 import { ReviewPage } from "@/features/review/ReviewPage";
 import { ShopPage } from "@/features/shop/ShopPage";
@@ -14,8 +14,9 @@ export interface AppRoute {
 }
 
 export const APP_ROUTES: AppRoute[] = [
-  { path: "/", element: <HallPage /> },
-  { path: "/map", element: <MapPage /> },
+  { path: "/", element: <PathPage /> },
+  // 旧地图并入路径主页；保留路由避免旧链接失效
+  { path: "/map", element: <Navigate to="/" replace /> },
   { path: "/quests/:questId", element: <QuestPage /> },
   { path: "/skills", element: <SkillsPage /> },
   { path: "/vault", element: <VaultPage /> },

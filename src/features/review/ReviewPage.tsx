@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import confetti from "canvas-confetti";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { QUEST_BY_ID } from "@/content/quests";
 import { SKILL_BY_ID } from "@/content/skills";
@@ -13,6 +14,7 @@ import { getDueCards, getUpcomingCardInfo, getUpcomingCount } from "@/engine/rev
 import { REVIEW_GOLD } from "@/engine/rewardEngine";
 import { WarmupCard } from "@/features/quests/WarmupCard";
 import { todayStr } from "@/lib/date";
+import { SPRING_BOUNCY, SPRING_GENTLE } from "@/lib/motion";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { ReviewRating } from "@/types/domain";
 
@@ -32,6 +34,20 @@ export function ReviewPage() {
   const upcoming = getUpcomingCount(reviewStates, completedIds, today);
   const card = sessionCards[index];
   const sessionDone = sessionCards.length > 0 && index >= sessionCards.length;
+  const reduced = useReducedMotion();
+
+  // 复习全部完成：来一点彩带
+  useEffect(() => {
+    if (sessionDone && !reduced) {
+      confetti({
+        particleCount: 70,
+        spread: 65,
+        origin: { y: 0.6 },
+        colors: ["#E8A33D", "#F6C066", "#7FA7C9", "#7A9E5F"],
+        disableForReducedMotion: true,
+      });
+    }
+  }, [sessionDone, reduced]);
 
   const handleRate = (rating: ReviewRating) => {
     if (!card) return;
@@ -54,16 +70,25 @@ export function ReviewPage() {
     return (
       <div className="space-y-5">
         <ReviewHeader due={0} />
-        <Card elevated className="p-8 text-center">
-          <Icon name="sparkle" size={36} className="mx-auto mb-3 text-ember" />
-          <h2 className="text-lg font-bold text-ink mb-1">今日复习完成</h2>
-          <p className="text-sm text-ink-soft mb-4">
-            复习了 {ratedCount} 张卡片，+{ratedCount * REVIEW_GOLD} 金币。记忆的火花已经重新点亮。
-          </p>
-          <Link to="/">
-            <Button>回炉火大厅</Button>
-          </Link>
-        </Card>
+        <motion.div initial={{ opacity: 0, scale: 0.92, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={SPRING_BOUNCY}>
+          <Card elevated className="p-8 text-center">
+            <motion.span
+              initial={{ scale: 0.4, rotate: -12 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ ...SPRING_BOUNCY, delay: 0.12 }}
+              className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-ember/15 text-ember"
+            >
+              <Icon name="sparkle" size={32} />
+            </motion.span>
+            <h2 className="text-lg font-bold text-ink mb-1">今日复习完成</h2>
+            <p className="text-sm text-ink-soft mb-4">
+              复习了 {ratedCount} 张卡片，+{ratedCount * REVIEW_GOLD} 金币。记忆的火花已经重新点亮。
+            </p>
+            <Link to="/">
+              <Button>回到路径</Button>
+            </Link>
+          </Card>
+        </motion.div>
       </div>
     );
   }
@@ -84,10 +109,9 @@ export function ReviewPage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={card.id}
-            initial={{ opacity: 0, x: 32 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -32 }}
-            transition={{ duration: 0.22 }}
+            initial={{ opacity: 0, x: 48, rotate: 1.5 }}
+            animate={{ opacity: 1, x: 0, rotate: 0, transition: SPRING_GENTLE }}
+            exit={{ opacity: 0, x: -40, rotate: -1.5, transition: { duration: 0.16, ease: "easeIn" } }}
           >
             <Card elevated className="p-6 sm:p-8">
               <div className="flex items-center justify-between mb-4">
@@ -197,7 +221,7 @@ function ReviewEmptyState({ upcoming, completedIds }: { upcoming: number; comple
         )}
         {!upcomingInfo && (
           <Link to="/" className="inline-block mt-4">
-            <Button variant="secondary">回炉火大厅</Button>
+            <Button variant="secondary">回到路径</Button>
           </Link>
         )}
       </Card>

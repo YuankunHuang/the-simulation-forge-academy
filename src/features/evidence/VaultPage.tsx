@@ -10,6 +10,7 @@ import { showcasePromptsFor } from "@/engine/evidenceEngine";
 import { RARITY_STYLE } from "@/lib/formatting";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { Artifact } from "@/types/domain";
+import { VaultTabs } from "./VaultTabs";
 
 /** 证据宝库 — 战利品陈列室。锁定的神器保留悬念，解锁的神器给出全套职业展示内容。 */
 export function VaultPage() {
@@ -29,6 +30,8 @@ export function VaultPage() {
           已铸造 {unlockedCount} / {ARTIFACTS.length} 件证据神器。每一件都是你转型路上可以指给别人看的东西。
         </p>
       </header>
+
+      <VaultTabs />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ARTIFACTS.map((artifact, i) => {

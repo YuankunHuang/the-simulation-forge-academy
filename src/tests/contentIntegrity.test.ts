@@ -101,28 +101,41 @@ describe("内容完整性 · 任务引用", () => {
   });
 });
 
-describe("内容完整性 · 基础弧线深度（R0–M3 + Boss）", () => {
-  const FOUNDATION = ["q_r0", "m0", "m1", "m2", "m3", "boss_bridge"];
+describe("内容完整性 · Act I 全线深度", () => {
+  /** Act I 全部主线与 Boss 任务（工坊深度字段必须齐备） */
+  const ACT1_QUESTS = QUESTS.filter(
+    (q) => q.regionId !== "production_basecamp" && (q.type === "main" || q.type === "boss" || q.type === "reflection"),
+  );
 
-  it("基础弧线任务包含全部深度字段", () => {
-    for (const id of FOUNDATION) {
-      const quest = QUEST_BY_ID[id];
-      expect(quest.conceptMap?.length, `${id}.conceptMap`).toBeGreaterThan(0);
-      expect(quest.filesToCreate?.length, `${id}.filesToCreate`).toBeGreaterThan(0);
-      expect(quest.steps?.length, `${id}.steps`).toBeGreaterThan(0);
-      expect(quest.debuggingNotes?.length, `${id}.debuggingNotes`).toBeGreaterThan(0);
-      expect(quest.publicShowcaseSeed, `${id}.publicShowcaseSeed`).toBeTruthy();
+  it("Act I 每个任务都包含全部深度字段（概念链/产物/步骤/调试/展示种子）", () => {
+    for (const quest of ACT1_QUESTS) {
+      expect(quest.conceptMap?.length, `${quest.id}.conceptMap`).toBeGreaterThan(0);
+      expect(quest.filesToCreate?.length, `${quest.id}.filesToCreate`).toBeGreaterThan(0);
+      expect(quest.steps?.length, `${quest.id}.steps`).toBeGreaterThan(0);
+      expect(quest.debuggingNotes?.length, `${quest.id}.debuggingNotes`).toBeGreaterThan(0);
+      expect(quest.publicShowcaseSeed, `${quest.id}.publicShowcaseSeed`).toBeTruthy();
     }
   });
 
-  it("基础弧线的主线台词齐备（米拉逐关引导）", () => {
-    for (const id of FOUNDATION) {
-      const line = NPC_DIALOGUES.find((d) => d.context === "quest_focus" && d.questId === id);
-      expect(line, `缺少 ${id} 的 quest_focus 台词`).toBeDefined();
+  it("Act I 每个任务都有米拉的 quest_focus 台词", () => {
+    for (const quest of ACT1_QUESTS) {
+      const line = NPC_DIALOGUES.find((d) => d.context === "quest_focus" && d.questId === quest.id);
+      expect(line, `缺少 ${quest.id} 的 quest_focus 台词`).toBeDefined();
     }
   });
 
-  it("Boss 之门要求五问 + 总结，且铸成桥村之印", () => {
+  it("每座 Boss 之门都铸成一枚之印神器", () => {
+    const bosses = QUESTS.filter((q) => q.type === "boss");
+    expect(bosses.length).toBe(6);
+    for (const boss of bosses) {
+      expect(boss.artifactIds.length, `${boss.id} 应产出之印`).toBe(1);
+      const artifact = ARTIFACT_BY_ID[boss.artifactIds[0]];
+      expect(artifact, `${boss.id} 的之印`).toBeDefined();
+      expect(artifact.sourceQuestId).toBe(boss.id);
+    }
+  });
+
+  it("初次信号之门要求五问 + 总结", () => {
     const boss = QUEST_BY_ID.boss_bridge;
     const required = boss.evidenceRequired.filter((e) => !e.optional);
     expect(required.length).toBe(6); // 总结 + 五问

@@ -102,7 +102,10 @@ describe("reviewEngine · 卡片来源引导（v0.2）", () => {
   });
 
   it("全部带卡任务完成后返回 null", () => {
-    const allWithCards = ["q_r0", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "b2", "b4", "b5"];
+    const allWithCards = [
+      "q_r0", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "m11", "m12",
+      "b2", "b4", "b5",
+    ];
     expect(getUpcomingCardInfo(allWithCards)).toBeNull();
   });
 });

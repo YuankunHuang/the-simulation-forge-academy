@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { DUNGEON_BY_ID } from "@/content/bonusDungeons";
 import { QUEST_BY_ID } from "@/content/quests";
 import { SKILL_BY_ID } from "@/content/skills";
+import { assembleDefenseText } from "@/engine/evidenceEngine";
 import { canCompleteQuest } from "@/engine/questEngine";
 import {
   LOW_ENERGY_GOLD,
@@ -105,13 +106,7 @@ export const usePlayerStore = create<PlayerStore>()(
         // 篝火日志：普通任务记第一条反思；Boss 之门把整场答辩存为面试防线记录
         const newJournalEntries: PlayerState["journal"] = [];
         if (quest.type === "boss") {
-          const defenseText = quest.evidenceRequired
-            .map((req) => {
-              const value = (fields[req.id] ?? "").trim();
-              return value ? `【${req.label}】\n${value}` : "";
-            })
-            .filter(Boolean)
-            .join("\n\n");
+          const defenseText = assembleDefenseText(quest, fields);
           if (defenseText) {
             newJournalEntries.push({
               id: uid("j"),
