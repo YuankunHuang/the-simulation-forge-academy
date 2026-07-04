@@ -3,7 +3,9 @@ import { QUEST_BY_ID } from "@/content/quests";
 import {
   DEFAULT_EASE,
   MIN_EASE,
+  cardsUnlockedBy,
   getDueCards,
+  getUpcomingCardInfo,
   getWarmupCard,
   initialCardState,
   rateCard,
@@ -76,6 +78,32 @@ describe("reviewEngine · 到期卡与卡组准入", () => {
     };
     const due = getDueCards(states, ["q_r0", "m0", "m1", "m2"], TODAY);
     expect(due.map((c) => c.id)).not.toContain("card_extern_c");
+  });
+});
+
+describe("reviewEngine · 卡片来源引导（v0.2）", () => {
+  it("cardsUnlockedBy 返回任务关联的全部卡", () => {
+    const m2Cards = cardsUnlockedBy("m2").map((c) => c.id);
+    expect(m2Cards).toContain("card_extern_c");
+    expect(m2Cards).toContain("card_entrypoint");
+    expect(cardsUnlockedBy("m0")).toHaveLength(0);
+  });
+
+  it("新玩家的下一批卡指向 M2（世界顺序上第一个带卡的未完成任务）", () => {
+    const info = getUpcomingCardInfo([]);
+    expect(info).not.toBeNull();
+    expect(info!.quest.id).toBe("m2");
+    expect(info!.cards.length).toBeGreaterThan(0);
+  });
+
+  it("完成 M2 后，下一批卡指向 M3", () => {
+    const info = getUpcomingCardInfo(["q_r0", "m0", "m1", "m2"]);
+    expect(info!.quest.id).toBe("m3");
+  });
+
+  it("全部带卡任务完成后返回 null", () => {
+    const allWithCards = ["m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"];
+    expect(getUpcomingCardInfo(allWithCards)).toBeNull();
   });
 });
 

@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { ARTIFACTS } from "@/content/artifacts";
 import { QUEST_BY_ID } from "@/content/quests";
 import { Icon } from "@/components/icons";
-import { Card } from "@/components/ui/Card";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Modal } from "@/components/ui/Modal";
 import { RarityBadge } from "@/components/ui/RarityBadge";
@@ -12,7 +11,7 @@ import { RARITY_STYLE } from "@/lib/formatting";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { Artifact } from "@/types/domain";
 
-/** 证据宝库 — 战利品陈列室。每件神器附带职业展示建议。 */
+/** 证据宝库 — 战利品陈列室。锁定的神器保留悬念，解锁的神器给出全套职业展示内容。 */
 export function VaultPage() {
   const completedIds = usePlayerStore(selectCompletedIds);
   const [selected, setSelected] = useState<Artifact | null>(null);
@@ -36,18 +35,31 @@ export function VaultPage() {
           const unlocked = completedIds.includes(artifact.sourceQuestId);
           const quest = QUEST_BY_ID[artifact.sourceQuestId];
           const style = RARITY_STYLE[artifact.rarity];
+
+          // 锁定态：剪影 + 稀有度 + 来源 + 悬念一句，不泄露展示内容
           if (!unlocked) {
             return (
-              <Card key={artifact.id} className="p-4 border-dashed border-wood-light/30 bg-cream-200/40">
-                <div className="flex items-center justify-between mb-2">
-                  <Icon name="lock" size={18} className="text-ink-faint" />
+              <div
+                key={artifact.id}
+                className={`rounded-2xl border border-dashed p-4 bg-cream-200/40 ${style.border} opacity-90`}
+              >
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink/[0.06] text-ink-faint">
+                    <Icon name="lock" size={16} />
+                  </span>
                   <RarityBadge rarity={artifact.rarity} />
                 </div>
-                <p className="text-sm font-semibold text-ink-faint">未铸造的神器</p>
-                <p className="mt-1 text-xs text-ink-faint">完成 {quest ? `${quest.code} · ${quest.title}` : "对应任务"} 后铸造</p>
-              </Card>
+                <p className="text-sm font-bold text-ink-faint leading-snug select-none" aria-label="未解锁神器">
+                  {artifact.name}
+                </p>
+                <p className="mt-1.5 text-xs italic text-ink-faint text-balance">「{artifact.teaser}」</p>
+                <p className="mt-2.5 text-[11px] font-medium text-wood-dark">
+                  铸造条件：完成 {quest ? `${quest.code} · ${quest.title}` : "对应任务"}
+                </p>
+              </div>
             );
           }
+
           return (
             <motion.button
               key={artifact.id}
@@ -83,14 +95,19 @@ export function VaultPage() {
 }
 
 function ArtifactDetail({ artifact }: { artifact: Artifact }) {
+  const completions = usePlayerStore((s) => s.questCompletions);
   const prompts = showcasePromptsFor(artifact);
   const quest = QUEST_BY_ID[artifact.sourceQuestId];
-  const sections: Array<{ title: string; body: string; copyable?: string }> = [
-    { title: "它证明了什么", body: artifact.proves },
-    { title: "职业价值", body: artifact.careerValue },
-    { title: "面试讲法", body: prompts.interview, copyable: prompts.interview },
-    { title: "简历要点（可直接粘贴）", body: prompts.resume, copyable: prompts.resume },
-    { title: "作品集建议", body: prompts.portfolio },
+  const completion = completions[artifact.sourceQuestId];
+
+  const sections: Array<{ title: string; body: string; copyText: string }> = [
+    { title: "它证明了什么", body: artifact.proves, copyText: artifact.proves },
+    { title: "职业价值", body: artifact.careerValue, copyText: artifact.careerValue },
+    { title: "面试讲法", body: prompts.interview, copyText: prompts.interview },
+    { title: "简历要点（可直接粘贴）", body: prompts.resume, copyText: prompts.resume },
+    { title: "LinkedIn 建议", body: artifact.linkedinSuggestion, copyText: prompts.linkedin },
+    { title: "博客建议", body: artifact.blogSuggestion, copyText: prompts.blog },
+    { title: "作品集建议", body: artifact.portfolioSuggestion, copyText: artifact.portfolioSuggestion },
   ];
 
   return (
@@ -108,36 +125,45 @@ function ArtifactDetail({ artifact }: { artifact: Artifact }) {
           </span>
         ))}
       </div>
+
+      {/* 铸造它的证据 */}
+      {completion && quest && (
+        <div className="rounded-xl border border-moss/30 bg-moss/5 p-4">
+          <h3 className="text-xs font-bold text-moss-deep mb-2.5 flex items-center gap-1.5">
+            <Icon name="check" size={13} />
+            铸造它的证据（你当时提交的内容）
+          </h3>
+          <dl className="space-y-2.5">
+            {quest.evidenceRequired.map((req) => {
+              const value = completion.evidence[req.id];
+              if (!value?.trim()) return null;
+              return (
+                <div key={req.id}>
+                  <dt className="text-[11px] font-semibold text-ink-soft mb-0.5">{req.label}</dt>
+                  <dd className="whitespace-pre-wrap rounded-lg bg-white/60 px-3 py-1.5 text-xs text-ink">{value}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </div>
+      )}
+
+      {/* 展示内容：每条都可复制（LinkedIn/博客复制的是 AI 起草 prompt） */}
       {sections.map((sec) => (
         <div key={sec.title} className="rounded-xl bg-cream-200/50 p-4">
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <h3 className="text-xs font-bold text-ink-soft">{sec.title}</h3>
-            {sec.copyable && <CopyButton text={sec.copyable} />}
+            <CopyButton
+              text={sec.copyText}
+              label={sec.title.includes("LinkedIn") || sec.title.includes("博客") ? "复制起草 Prompt" : "复制"}
+            />
           </div>
           <p className="text-sm text-ink whitespace-pre-wrap">{sec.body}</p>
         </div>
       ))}
-      {/* 展示 Prompt */}
-      <div className="rounded-xl border border-plum/30 bg-plum/5 p-4 space-y-3">
-        <h3 className="text-xs font-bold text-plum-deep flex items-center gap-1.5">
-          <Icon name="sparkle" size={13} />
-          展示 Prompt（复制给 AI 帮你起草，不会自动发布任何内容）
-        </h3>
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-semibold text-ink-soft">LinkedIn 草稿 Prompt</p>
-            <CopyButton text={prompts.linkedin} />
-          </div>
-          <p className="text-xs text-ink-soft line-clamp-3">{prompts.linkedin}</p>
-        </div>
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-semibold text-ink-soft">博客大纲 Prompt</p>
-            <CopyButton text={prompts.blog} />
-          </div>
-          <p className="text-xs text-ink-soft line-clamp-3">{prompts.blog}</p>
-        </div>
-      </div>
+      <p className="text-[11px] text-ink-faint">
+        提示：LinkedIn / 博客的复制按钮给出的是完整起草 Prompt，交给 AI 生成草稿。学院不会自动发布任何内容。
+      </p>
     </div>
   );
 }

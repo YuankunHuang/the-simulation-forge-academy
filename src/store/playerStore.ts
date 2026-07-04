@@ -15,7 +15,7 @@ import {
   skillsMadeAvailableBy,
   titleForCompleted,
 } from "@/engine/rewardEngine";
-import { initialCardState, rateCard } from "@/engine/reviewEngine";
+import { cardsUnlockedBy, initialCardState, rateCard } from "@/engine/reviewEngine";
 import { addQuestToSprint, buildRecap, createSprint } from "@/engine/sprintEngine";
 import { isoNow, todayStr } from "@/lib/date";
 import { uid } from "@/lib/ids";
@@ -38,6 +38,8 @@ export interface PlayerStore extends PlayerState {
   setEnergyMode: (mode: EnergyMode) => void;
   completeQuest: (questId: string, fields: Record<string, string>) => boolean;
   closeCeremony: () => void;
+  /** 深度冲刺必须显式开始：仅选择模式不会开启冲刺 */
+  startSprint: () => void;
   endSprint: () => void;
 
   rateReviewCard: (cardId: string, rating: ReviewRating) => void;
@@ -67,13 +69,15 @@ export const usePlayerStore = create<PlayerStore>()(
       ...createInitialPlayerState(),
       ceremony: null,
 
+      // 模式只改变推荐节奏与大厅呈现；冲刺由 startSprint 显式开启
       setEnergyMode: (mode) => {
-        const s = get();
-        if (mode === "deep" && !s.sprint) {
-          set({ energyMode: mode, sprint: createSprint(isoNow()) });
-          return;
-        }
         set({ energyMode: mode });
+      },
+
+      startSprint: () => {
+        const s = get();
+        if (s.sprint) return;
+        set({ sprint: createSprint(isoNow()), energyMode: "deep" });
       },
 
       completeQuest: (questId, fields) => {
@@ -118,6 +122,7 @@ export const usePlayerStore = create<PlayerStore>()(
           rewards: bundle,
           artifactIds: artifacts.map((a) => a.id),
           skillsMadeAvailable: newSkills.map((n) => n.id),
+          reviewCardIds: cardsUnlockedBy(questId).map((c) => c.id),
           newTitle: titleAfter.titleEn !== titleBefore ? `${titleAfter.title} · ${titleAfter.titleEn}` : undefined,
           leveledUpTo: levelAfter > levelBefore ? levelAfter : undefined,
         };
@@ -150,6 +155,11 @@ export const usePlayerStore = create<PlayerStore>()(
         const s = get();
         if (!s.sprint) {
           set({ energyMode: "normal" });
+          return;
+        }
+        // 空冲刺（没完成任何任务）不生成回顾，避免日志噪音
+        if (s.sprint.questIds.length === 0) {
+          set({ sprint: null, energyMode: "normal" });
           return;
         }
         const completedIds = Object.keys(s.questCompletions);

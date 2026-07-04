@@ -116,6 +116,8 @@ export interface Artifact {
   nameEn: string;
   rarity: Rarity;
   sourceQuestId: string;
+  /** 锁定态展示的一句悬念文案 */
+  teaser: string;
   /** 它证明了什么 */
   proves: string;
   careerValue: string;
@@ -251,6 +253,8 @@ export interface CeremonyPayload {
   artifactIds: string[];
   /** 本次完成让哪些技能节点“证据就绪” */
   skillsMadeAvailable: string[];
+  /** 本次完成让哪些复习卡进入卡组 */
+  reviewCardIds: string[];
   newTitle?: string;
   leveledUpTo?: number;
 }

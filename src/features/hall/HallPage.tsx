@@ -1,31 +1,33 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { REGION_BY_ID } from "@/content/campaigns";
-import { NPC_NAME, NPC_ROLE, pickDialogue } from "@/content/npcDialogues";
+import { NPC_NAME, pickDialogue } from "@/content/npcDialogues";
 import { Icon, MiraAvatar, type IconName } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { StatPill } from "@/components/ui/StatPill";
 import { getBlockedExplanation, getRecommendedQuest } from "@/engine/questEngine";
 import { getDueCards } from "@/engine/reviewEngine";
 import { titleForCompleted, xpProgress } from "@/engine/rewardEngine";
 import { getCurrentRegion } from "@/engine/unlockEngine";
 import { computeMomentum, timeOfDay, todayStr } from "@/lib/date";
-import { QUEST_TYPE_LABEL } from "@/lib/formatting";
+import { QUEST_TYPE_LABEL, formatNumber } from "@/lib/formatting";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import { LowEnergyPanel } from "./LowEnergyPanel";
 import { ModeSelector } from "./ModeSelector";
-import { MomentumFlame } from "./MomentumFlame";
+import { SprintPanel } from "./SprintPanel";
 
-/** 炉火大厅 — 每日驾驶舱。回答：我在哪、今天做什么、为什么。 */
+/**
+ * 炉火大厅 v0.2 — 焦点驾驶舱。
+ * 视觉层级：导师问候 → 今日任务（主角）→ 节奏选择 → 进度条 → 次级入口。
+ * 目标：3 秒内知道今天做什么。
+ */
 export function HallPage() {
   const wallet = usePlayerStore((s) => s.wallet);
   const energyMode = usePlayerStore((s) => s.energyMode);
   const activeDates = usePlayerStore((s) => s.activeDates);
   const sprint = usePlayerStore((s) => s.sprint);
-  const endSprint = usePlayerStore((s) => s.endSprint);
   const reviewStates = usePlayerStore((s) => s.reviewStates);
   const completedIds = usePlayerStore(selectCompletedIds);
 
@@ -38,18 +40,22 @@ export function HallPage() {
   const currentRegion = getCurrentRegion(completedIds);
   const dueCount = getDueCards(reviewStates, completedIds, today).length;
 
-  // 米拉的问候：回归优先 → 模式 → 时段；再补一句区域风味
+  // 米拉问候：回归 > 冲刺 > 模式 > Boss 前 > 时段
   const isReturning = activeDates.length > 0 && momentum.awayDays >= 3;
   let greeting = pickDialogue(`greeting_${timeOfDay()}`, daySeed)?.text ?? "";
   if (isReturning) greeting = pickDialogue("welcome_back", daySeed)?.text ?? greeting;
+  else if (sprint) greeting = pickDialogue("deep_start", daySeed)?.text ?? greeting;
   else if (energyMode === "low") greeting = pickDialogue("low_energy", daySeed)?.text ?? greeting;
-  else if (energyMode === "deep") greeting = pickDialogue("deep_start", daySeed)?.text ?? greeting;
   else if (recommended?.type === "boss") greeting = pickDialogue("boss_ahead", daySeed)?.text ?? greeting;
   else if (!recommended) greeting = pickDialogue("all_clear", daySeed)?.text ?? greeting;
   const flavor = pickDialogue("region_flavor", daySeed, currentRegion.id)?.text;
 
-  const quickNav: Array<{ to: string; label: string; icon: IconName; badge?: number }> = [
-    { to: "/map", label: "征程地图", icon: "map" },
+  const requiredEvidenceCount = recommended
+    ? recommended.evidenceRequired.filter((e) => !e.optional).length
+    : 0;
+
+  const secondaryNav: Array<{ to: string; label: string; icon: IconName; badge?: number }> = [
+    { to: "/map", label: "地图", icon: "map" },
     { to: "/skills", label: "技能树", icon: "skilltree" },
     { to: "/vault", label: "证据宝库", icon: "chest" },
     { to: "/review", label: "复习卡组", icon: "cards", badge: dueCount },
@@ -57,138 +63,180 @@ export function HallPage() {
     { to: "/journal", label: "篝火日志", icon: "book" },
   ];
 
+  const FLAME_LABEL = ["余烬", "小火苗", "稳定火焰", "旺火"] as const;
+
   return (
-    <div className="space-y-5">
-      {/* 导师问候 */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <Card elevated className="p-5 sm:p-6 bg-gradient-to-br from-cream-50 to-cream-200/60">
-          <div className="flex items-start gap-4">
-            <MiraAvatar size={60} className="shrink-0 mt-0.5" />
-            <div className="min-w-0">
-              <p className="text-xs text-ink-faint mb-1">
-                <span className="font-semibold text-ink">{NPC_NAME}</span> · {NPC_ROLE}
+    <div className="space-y-4">
+      {/* A. 导师横幅 — 一句主话 + 一行小字 */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex items-start gap-3.5 rounded-2xl bg-gradient-to-r from-cream-200/80 to-transparent px-4 py-3.5">
+          <MiraAvatar size={48} className="shrink-0" />
+          <div className="min-w-0 pt-0.5">
+            <p className="text-[15px] leading-relaxed text-ink text-balance">{greeting}</p>
+            {flavor && (
+              <p className="mt-1 text-xs text-ink-faint italic truncate">
+                {NPC_NAME} ·「{flavor}」
               </p>
-              <p className="text-[15px] leading-relaxed text-ink text-balance">{greeting}</p>
-              {flavor && <p className="mt-2 text-xs text-ink-soft italic">「{flavor}」</p>}
-            </div>
+            )}
           </div>
-        </Card>
+        </div>
       </motion.div>
 
-      {/* 角色状态 */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs text-ink-faint mb-0.5">当前职业称号</p>
-              <p className="text-base font-bold text-ink">{title.title}</p>
-              <p className="text-xs text-ink-faint">{title.titleEn}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-plum-deep">Lv.{progress.level}</p>
-              <p className="text-[11px] text-ink-faint">
-                {progress.intoLevel}/{progress.needed} XP
-              </p>
-            </div>
-          </div>
-          <ProgressBar value={progress.intoLevel} max={progress.needed} tone="plum" label="等级进度" />
-          <div className="mt-4 flex flex-wrap gap-2">
-            <StatPill icon="coin" value={wallet.gold} label="金币" tone="gold" />
-            <StatPill icon="skilltree" value={wallet.skillPoints} label="技能点" tone="skill" />
-            <StatPill icon="trophy" value={wallet.reputation} label="声望" tone="rep" />
-            <StatPill icon="gem" value={wallet.insight} label="洞察" tone="insight" />
-          </div>
-        </Card>
-        <div className="space-y-3">
-          <MomentumFlame />
-          <ModeSelector />
-          {sprint && (
-            <div className="flex items-center justify-between rounded-xl border border-ember/40 bg-ember/10 px-4 py-2.5">
-              <p className="text-sm text-ember-deep font-medium">
-                冲刺进行中 · 已完成 {sprint.questIds.length} 个任务
-              </p>
-              <Button size="sm" variant="secondary" onClick={endSprint}>
-                结束冲刺
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* 冲刺状态（idle/active/ended 由面板自判，日常模式不渲染） */}
+      <SprintPanel />
 
-      {/* 低能量模式面板 */}
-      {energyMode === "low" && <LowEnergyPanel questId={recommended?.id} />}
-
-      {/* 今日推荐任务 */}
-      <Card elevated className="p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold tracking-wider text-ember-deep uppercase">今日推荐</p>
-          {recommended && <Badge tone={recommended.type === "boss" ? "ember" : "moss"}>{QUEST_TYPE_LABEL[recommended.type]}</Badge>}
-        </div>
+      {/* B. 今日任务英雄卡 — 页面主角 */}
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
         {recommended ? (
-          <>
-            <div className="flex items-start gap-3 mb-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ember/15 text-ember-deep">
-                <Icon name={recommended.type === "boss" ? "shield" : "hammer"} size={22} />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-lg font-bold text-ink">
-                  {recommended.code} · {recommended.title}
-                </h2>
-                <p className="text-xs text-ink-faint">
+          <Card
+            elevated
+            className="relative overflow-hidden !border-ember/40 p-6 sm:p-8 bg-gradient-to-br from-cream-50 via-cream-50 to-ember/10"
+          >
+            <div className="absolute -right-8 -top-8 text-ember/10" aria-hidden="true">
+              <Icon name={recommended.type === "boss" ? "shield" : "hammer"} size={160} />
+            </div>
+            <div className="relative">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="rounded-lg bg-ember px-2.5 py-1 text-xs font-bold text-white">今日任务</span>
+                <Badge tone={recommended.type === "boss" ? "ember" : "moss"}>
+                  {QUEST_TYPE_LABEL[recommended.type]}
+                </Badge>
+                <span className="text-xs text-ink-faint">
                   {REGION_BY_ID[recommended.regionId]?.name}
                   {recommended.estimate && ` · 预计 ${recommended.estimate}`}
-                </p>
+                </span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-bold text-ink mb-2">
+                {recommended.code} · {recommended.title}
+              </h1>
+              <p className="text-sm text-ink-soft max-w-xl mb-4 text-balance">{recommended.whyItMatters.split("。")[0]}。</p>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-5 text-xs text-ink-soft">
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon name="chest" size={14} className="text-wood" />
+                  {requiredEvidenceCount} 项必交证据
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon name="star" size={14} className="text-plum-deep" />+{recommended.rewards.xp} XP
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon name="coin" size={14} className="text-ember-deep" />+{recommended.rewards.gold} 金币
+                </span>
+                {recommended.rewards.skillPoints > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Icon name="skilltree" size={14} className="text-skyblue-deep" />+{recommended.rewards.skillPoints} 技能点
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 sm:max-w-md">
+                <Link to={`/quests/${recommended.id}`} className="flex-[2]">
+                  <Button size="lg" className="w-full">
+                    <Icon name="hammer" size={18} />
+                    进入工坊
+                  </Button>
+                </Link>
+                <Link to="/map" className="flex-1">
+                  <Button size="lg" variant="secondary" className="w-full">
+                    查看地图
+                  </Button>
+                </Link>
               </div>
             </div>
-            <p className="text-sm text-ink-soft mb-1.5">{recommended.objective}</p>
-            <p className="text-xs text-ink-faint italic mb-4 text-balance">「{recommended.narrativeHook}」</p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Link to={`/quests/${recommended.id}`} className="flex-1">
-                <Button className="w-full">
-                  <Icon name="hammer" size={16} />
-                  进入工坊
-                </Button>
-              </Link>
-              <Link to="/map" className="flex-1 sm:flex-none">
-                <Button variant="secondary" className="w-full">
-                  <Icon name="map" size={16} />
-                  查看地图
-                </Button>
-              </Link>
-            </div>
-          </>
+          </Card>
         ) : (
-          <p className="text-sm text-ink-soft">{getBlockedExplanation(completedIds)}</p>
+          <Card elevated className="p-8 text-center">
+            <Icon name="sparkle" size={32} className="mx-auto mb-3 text-ember" />
+            <p className="text-sm text-ink-soft max-w-md mx-auto">{getBlockedExplanation(completedIds)}</p>
+            <Link to="/vault" className="inline-block mt-4">
+              <Button variant="secondary">看看宝库里的战利品</Button>
+            </Link>
+          </Card>
         )}
-        {dueCount > 0 && energyMode !== "low" && (
-          <Link
-            to="/review"
-            className="mt-4 flex items-center gap-2 rounded-xl bg-skyblue/10 border border-skyblue/30 px-4 py-2.5 text-sm text-skyblue-deep hover:bg-skyblue/15 transition-colors"
-          >
-            <Icon name="cards" size={16} />
-            今日小复习：{dueCount} 张卡片到期（几分钟就好，不抢主线）
-          </Link>
-        )}
+      </motion.div>
+
+      {/* C. 节奏选择 + 低能量套餐 */}
+      <Card className="p-4">
+        <ModeSelector />
+      </Card>
+      {energyMode === "low" && <LowEnergyPanel questId={recommended?.id} />}
+
+      {/* 今日小复习提示（不抢主线） */}
+      {dueCount > 0 && energyMode !== "low" && (
+        <Link
+          to="/review"
+          className="flex items-center gap-2 rounded-xl bg-skyblue/10 border border-skyblue/25 px-4 py-2.5 text-sm text-skyblue-deep hover:bg-skyblue/15 transition-colors"
+        >
+          <Icon name="cards" size={15} />
+          顺手复习：{dueCount} 张卡到期，几分钟就好
+        </Link>
+      )}
+
+      {/* D. 进度条 — 单行紧凑 */}
+      <Card className="px-5 py-4">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ink leading-tight">{title.title}</p>
+            <p className="text-[11px] text-ink-faint">{title.titleEn}</p>
+          </div>
+          <div className="flex items-center gap-2 flex-1 min-w-[160px]">
+            <span className="text-sm font-bold text-plum-deep whitespace-nowrap">Lv.{progress.level}</span>
+            <ProgressBar value={progress.intoLevel} max={progress.needed} tone="plum" className="flex-1" label="等级进度" />
+            <span className="text-[11px] text-ink-faint whitespace-nowrap">
+              {progress.intoLevel}/{progress.needed}
+            </span>
+          </div>
+          <div className="flex items-center gap-3.5 text-sm" aria-label="资源">
+            <span className="inline-flex items-center gap-1" title="金币">
+              <Icon name="coin" size={15} className="text-ember-deep" />
+              <span className="font-semibold">{formatNumber(wallet.gold)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1" title="技能点">
+              <Icon name="skilltree" size={15} className="text-skyblue-deep" />
+              <span className="font-semibold">{wallet.skillPoints}</span>
+            </span>
+            <span className="inline-flex items-center gap-1" title="声望">
+              <Icon name="trophy" size={15} className="text-moss-deep" />
+              <span className="font-semibold">{wallet.reputation}</span>
+            </span>
+            <span className="inline-flex items-center gap-1" title="洞察宝石">
+              <Icon name="gem" size={15} className="text-plum-deep" />
+              <span className="font-semibold">{wallet.insight}</span>
+            </span>
+            <span
+              className="inline-flex items-center gap-1"
+              title={`动量之火 · ${FLAME_LABEL[momentum.level]}${momentum.streakDays > 0 ? `（连续 ${momentum.streakDays} 天）` : ""}`}
+            >
+              <Icon
+                name="flame"
+                size={16}
+                className={momentum.level > 0 ? "text-ember animate-flicker" : "text-stone2"}
+              />
+              {momentum.streakDays > 0 && <span className="font-semibold">{momentum.streakDays}</span>}
+            </span>
+          </div>
+        </div>
       </Card>
 
-      {/* 快捷入口 */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-        {quickNav.map((item) => (
+      {/* E. 次级入口 — 小而低调 */}
+      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1.5" aria-label="学院设施">
+        {secondaryNav.map((item) => (
           <Link
             key={item.to}
             to={item.to}
-            className="relative flex flex-col items-center gap-1.5 rounded-xl border border-wood-light/25 bg-cream-50 px-2 py-3.5 text-ink-soft shadow-soft hover:border-ember/40 hover:text-ember-deep hover:-translate-y-0.5 transition-all"
+            className="relative flex items-center justify-center gap-1.5 rounded-lg border border-wood-light/20 bg-cream-50/70 px-2 py-2 text-xs text-ink-soft hover:text-ember-deep hover:border-ember/30 transition-colors"
           >
-            <Icon name={item.icon} size={22} />
-            <span className="text-xs font-medium">{item.label}</span>
+            <Icon name={item.icon} size={15} />
+            <span className="font-medium">{item.label}</span>
             {item.badge != null && item.badge > 0 && (
-              <span className="absolute top-1.5 right-1.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ember px-1 text-[10px] font-bold text-white">
+              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ember px-1 text-[9px] font-bold text-white">
                 {item.badge}
               </span>
             )}
           </Link>
         ))}
-      </div>
+      </nav>
     </div>
   );
 }

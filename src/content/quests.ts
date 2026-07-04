@@ -27,12 +27,13 @@ ${goal}
 }
 
 const EARLY_FORBIDDEN = [
-  "不要开始 XR。",
-  "不要开始 Android。",
-  "不要开始 SIMD。",
-  "不要开始 render-thread plugin events。",
-  "不要构建完整确定性仿真内核。",
-  "不要打开与当前任务无关的课程或教程。",
+  "不要做 XR。",
+  "不要做 Android。",
+  "不要做 SIMD。",
+  "不要做 render thread。",
+  "不要做 Unreal mirror。",
+  "不要做完整 deterministic simulation kernel。",
+  "不要随机打开新课程，除非它解决当前任务卡点。",
 ];
 
 export const QUESTS: Quest[] = [

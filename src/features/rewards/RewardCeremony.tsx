@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ARTIFACT_BY_ID } from "@/content/artifacts";
 import { QUEST_BY_ID } from "@/content/quests";
+import { CARD_BY_ID } from "@/content/reviewCards";
 import { SKILL_BY_ID } from "@/content/skills";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
@@ -27,6 +28,7 @@ export function RewardCeremony() {
   const nextQuest = ceremony ? getNextQuest(completedIds, ceremony.questId) : null;
   const artifacts = ceremony ? ceremony.artifactIds.map((id) => ARTIFACT_BY_ID[id]).filter(Boolean) : [];
   const skills = ceremony ? ceremony.skillsMadeAvailable.map((id) => SKILL_BY_ID[id]).filter(Boolean) : [];
+  const reviewCards = ceremony ? (ceremony.reviewCardIds ?? []).map((id) => CARD_BY_ID[id]).filter(Boolean) : [];
 
   const handleRest = () => {
     closeCeremony();
@@ -37,6 +39,11 @@ export function RewardCeremony() {
     closeCeremony();
     if (nextQuest) navigate(`/quests/${nextQuest.id}`);
     else navigate("/map");
+  };
+
+  const handleViewVault = () => {
+    closeCeremony();
+    navigate("/vault");
   };
 
   const handleEndSprint = () => {
@@ -151,7 +158,7 @@ export function RewardCeremony() {
 
             {/* 技能证据就绪 */}
             {skills.length > 0 && (
-              <div className="mb-5">
+              <div className="mb-4">
                 <p className="text-xs font-semibold text-ink-faint mb-2">技能证据就绪（去技能树点亮）</p>
                 <div className="flex flex-wrap gap-1.5">
                   {skills.map((s) => (
@@ -162,6 +169,23 @@ export function RewardCeremony() {
                       <Icon name="sparkle" size={12} />
                       {s.name}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 复习卡入组 */}
+            {reviewCards.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-ink-faint mb-2">
+                  {reviewCards.length} 张知识卡进入复习卡组（会按记忆曲线回来找你）
+                </p>
+                <div className="space-y-1">
+                  {reviewCards.map((c) => (
+                    <p key={c.id} className="flex items-start gap-1.5 text-xs text-ink-soft">
+                      <Icon name="cards" size={12} className="mt-0.5 shrink-0 text-skyblue-deep" />
+                      {c.prompt}
+                    </p>
                   ))}
                 </div>
               </div>
@@ -196,22 +220,32 @@ export function RewardCeremony() {
 
             {/* 按钮 */}
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button variant="secondary" className="flex-1" onClick={handleRest}>
-                <Icon name="flame" size={16} />
-                回炉火休息
-              </Button>
               {nextQuest && (
                 <Button className="flex-1" onClick={handleContinue}>
-                  继续冒险
+                  继续下一关
                   <Icon name="chevron-right" size={16} />
                 </Button>
               )}
-              {sprint && sprint.questIds.length > 0 && (
-                <Button variant="ghost" className="flex-1" onClick={handleEndSprint}>
-                  结束冲刺并生成回顾
+              <Button variant="secondary" className="flex-1" onClick={handleRest}>
+                <Icon name="flame" size={16} />
+                回到炉火大厅
+              </Button>
+              {artifacts.length > 0 && (
+                <Button variant="secondary" className="flex-1" onClick={handleViewVault}>
+                  <Icon name="chest" size={16} />
+                  查看证据宝库
                 </Button>
               )}
             </div>
+            {sprint && sprint.questIds.length > 0 && (
+              <button
+                type="button"
+                onClick={handleEndSprint}
+                className="mt-3 w-full text-center text-xs text-ink-faint hover:text-ink transition-colors"
+              >
+                结束冲刺并生成回顾 →
+              </button>
+            )}
           </motion.div>
         </motion.div>
       )}

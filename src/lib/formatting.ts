@@ -68,9 +68,9 @@ export const QUEST_TYPE_LABEL: Record<QuestType, string> = {
 };
 
 export const MODE_LABEL: Record<EnergyMode, { name: string; desc: string }> = {
-  low: { name: "低能量", desc: "1 张复习卡 + 一句小反思，也算胜利" },
-  normal: { name: "日常", desc: "1 步主线 + 1 份证据 + 1 次反思" },
-  deep: { name: "深度冲刺", desc: "连续推进多个任务，结束生成冲刺回顾" },
+  low: { name: "低能量", desc: "累的日子：一张复习卡 + 一句反思，火不灭就是胜利。" },
+  normal: { name: "日常", desc: "一步主线 + 一份证据 + 一次反思。" },
+  deep: { name: "深度冲刺", desc: "状态好的日子连推多关。在下方「开始冲刺」后才正式计入回顾。" },
 };
 
 export function clamp(n: number, min: number, max: number): number {

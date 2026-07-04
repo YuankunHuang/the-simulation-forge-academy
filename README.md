@@ -122,7 +122,7 @@ src/
   tests/      引擎单元测试（50 个用例）
 ```
 
-架构细节见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+架构细节见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，版本变更见 [docs/CHANGELOG.md](docs/CHANGELOG.md)。
 
 ## 已知限制（MVP）
 

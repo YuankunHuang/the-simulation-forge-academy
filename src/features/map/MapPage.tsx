@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { CAMPAIGNS, REGIONS } from "@/content/campaigns";
 import { Icon } from "@/components/icons";
+import { getRecommendedQuest } from "@/engine/questEngine";
 import { getRegionVisibility } from "@/engine/unlockEngine";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import { RegionSection } from "./RegionSection";
@@ -12,6 +13,7 @@ import { RegionSection } from "./RegionSection";
 export function MapPage() {
   const completedIds = usePlayerStore(selectCompletedIds);
   const visibility = getRegionVisibility(completedIds);
+  const recommendedQuestId = getRecommendedQuest(completedIds)?.id ?? null;
 
   return (
     <div className="space-y-8">
@@ -49,7 +51,12 @@ export function MapPage() {
                       viewport={{ once: true, margin: "-40px" }}
                       transition={{ delay: Math.min(i * 0.05, 0.3) }}
                     >
-                      <RegionSection region={region} visibility={visibility[region.id]} completedIds={completedIds} />
+                      <RegionSection
+                        region={region}
+                        visibility={visibility[region.id]}
+                        completedIds={completedIds}
+                        recommendedQuestId={recommendedQuestId}
+                      />
                     </motion.div>
                   ))}
                 </div>

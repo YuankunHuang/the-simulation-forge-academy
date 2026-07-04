@@ -1,3 +1,4 @@
+import { ORDERED_QUESTS } from "@/content/quests";
 import { REVIEW_CARDS } from "@/content/reviewCards";
 import { addDays } from "@/lib/date";
 import type { Quest, ReviewCard, ReviewCardState, ReviewRating } from "@/types/domain";
@@ -91,6 +92,29 @@ export function getUpcomingCount(
     const state = states[card.id];
     return !!state && state.nextReviewDate > today;
   }).length;
+}
+
+/** 完成该任务会让哪些复习卡进入卡组（奖励仪式展示用）。 */
+export function cardsUnlockedBy(questId: string): ReviewCard[] {
+  return REVIEW_CARDS.filter((c) => c.questId === questId);
+}
+
+export interface UpcomingCardInfo {
+  quest: Quest;
+  cards: ReviewCard[];
+}
+
+/**
+ * 空卡组引导：按世界顺序找到第一个「未完成且带复习卡」的任务，
+ * 告诉玩家完成它之后会有哪些知识卡入组。
+ */
+export function getUpcomingCardInfo(completedIds: readonly string[]): UpcomingCardInfo | null {
+  for (const quest of ORDERED_QUESTS) {
+    if (completedIds.includes(quest.id)) continue;
+    const cards = cardsUnlockedBy(quest.id);
+    if (cards.length > 0) return { quest, cards };
+  }
+  return null;
 }
 
 /**

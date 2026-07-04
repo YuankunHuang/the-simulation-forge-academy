@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
@@ -6,15 +7,20 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { getQuestStatus, getRegionProgress, getRegionQuests } from "@/engine/unlockEngine";
 import type { Region, RegionVisibility } from "@/types/domain";
 
-/** 地图上的一个区域：解锁 = 完整卡片；预览 = 剪影；迷雾 = 不渲染（由上层隐藏）。 */
+/**
+ * 地图上的一个区域。
+ * v0.2：当前区域高亮、当前任务醒目、完成节点安静、任务链以箭头连接（M0 → M1 → … → Boss）。
+ */
 export function RegionSection({
   region,
   visibility,
   completedIds,
+  recommendedQuestId,
 }: {
   region: Region;
   visibility: RegionVisibility;
   completedIds: readonly string[];
+  recommendedQuestId: string | null;
 }) {
   if (visibility === "fogged") {
     return (
@@ -56,13 +62,27 @@ export function RegionSection({
   const quests = getRegionQuests(region.id);
   const progress = getRegionProgress(region.id, completedIds);
   const complete = progress.total > 0 && progress.done === progress.total;
+  const isCurrentRegion = quests.some((q) => q.id === recommendedQuestId);
 
   return (
-    <Card elevated className={`relative sm:ml-12 p-5 ${complete ? "border-moss/40" : "border-ember/30"}`}>
+    <Card
+      elevated
+      className={`relative sm:ml-12 p-5 ${
+        complete
+          ? "border-moss/40"
+          : isCurrentRegion
+            ? "!border-ember/60 ring-1 ring-ember/25 shadow-glow"
+            : "border-wood-light/30"
+      }`}
+    >
       {/* 时间线节点 */}
       <span
         className={`hidden sm:flex absolute -left-[46px] top-6 h-7 w-7 items-center justify-center rounded-full border-2 ${
-          complete ? "border-moss bg-moss/20 text-moss-deep" : "border-ember bg-ember/15 text-ember-deep shadow-glow"
+          complete
+            ? "border-moss bg-moss/20 text-moss-deep"
+            : isCurrentRegion
+              ? "border-ember bg-ember/15 text-ember-deep shadow-glow"
+              : "border-wood-light/50 bg-cream-100 text-ink-faint"
         }`}
         aria-hidden="true"
       >
@@ -71,8 +91,9 @@ export function RegionSection({
 
       <div className="flex items-start justify-between gap-3 mb-2">
         <div>
-          <h3 className="text-base font-bold text-ink">
-            {region.name} <span className="ml-1 text-xs font-normal text-ink-faint">{region.nameEn}</span>
+          <h3 className="text-base font-bold text-ink flex items-center gap-2 flex-wrap">
+            {region.name} <span className="text-xs font-normal text-ink-faint">{region.nameEn}</span>
+            {isCurrentRegion && <Badge tone="ember">当前区域</Badge>}
           </h3>
           <p className="text-xs text-ink-soft mt-0.5">{region.description}</p>
         </div>
@@ -88,28 +109,44 @@ export function RegionSection({
         </div>
       )}
 
-      {/* 任务节点 */}
-      <div className="flex flex-wrap gap-2">
-        {quests.map((quest) => {
+      {/* 任务链：M0 → M1 → … → Boss */}
+      <div className="flex flex-wrap items-center gap-y-2">
+        {quests.map((quest, i) => {
           const info = getQuestStatus(quest, completedIds);
           const isBoss = quest.type === "boss";
+          const isCurrent = quest.id === recommendedQuestId;
           const base = "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-all";
-          if (info.status === "completed") {
-            return (
-              <Link key={quest.id} to={`/quests/${quest.id}`} className={`${base} border-moss/40 bg-moss/10 text-moss-deep hover:bg-moss/20`}>
+
+          let chip;
+          if (isCurrent) {
+            chip = (
+              <Link
+                to={`/quests/${quest.id}`}
+                className={`${base} border-ember bg-ember text-white shadow-glow hover:bg-ember-deep`}
+              >
+                <Icon name={isBoss ? "shield" : "hammer"} size={12} />
+                {quest.code} {quest.title}
+                <span className="rounded-full bg-white/25 px-1.5 text-[10px] font-bold">当前</span>
+              </Link>
+            );
+          } else if (info.status === "completed") {
+            chip = (
+              <Link
+                key={quest.id}
+                to={`/quests/${quest.id}`}
+                className={`${base} border-transparent bg-moss/10 text-moss-deep/90 hover:bg-moss/20`}
+              >
                 <Icon name="check" size={12} />
                 {quest.code} {quest.title}
               </Link>
             );
-          }
-          if (info.status === "available") {
-            return (
+          } else if (info.status === "available") {
+            chip = (
               <Link
-                key={quest.id}
                 to={`/quests/${quest.id}`}
                 className={`${base} ${
                   isBoss
-                    ? "border-ember bg-ember/15 text-ember-deep shadow-glow hover:bg-ember/25"
+                    ? "border-ember/60 bg-ember/10 text-ember-deep hover:bg-ember/20"
                     : "border-ember/50 bg-cream-50 text-ink hover:border-ember hover:shadow-soft"
                 }`}
               >
@@ -118,12 +155,27 @@ export function RegionSection({
                 {quest.optional && <span className="text-ink-faint">（可选）</span>}
               </Link>
             );
+          } else {
+            chip = (
+              <span className={`${base} border-wood-light/25 bg-cream-200/40 text-ink-faint/80 cursor-not-allowed`} title="前置任务未完成">
+                <Icon name="lock" size={11} />
+                {quest.code} {quest.title}
+              </span>
+            );
           }
+
           return (
-            <span key={quest.id} className={`${base} border-wood-light/30 bg-cream-200/50 text-ink-faint cursor-not-allowed`} title="前置任务未完成">
-              <Icon name="lock" size={12} />
-              {quest.code} {quest.title}
-            </span>
+            <Fragment key={quest.id}>
+              {i > 0 && (
+                <Icon
+                  name="chevron-right"
+                  size={12}
+                  className={`mx-1 shrink-0 ${info.status === "completed" ? "text-moss/60" : "text-wood-light/60"}`}
+                  aria-hidden="true"
+                />
+              )}
+              {chip}
+            </Fragment>
           );
         })}
       </div>

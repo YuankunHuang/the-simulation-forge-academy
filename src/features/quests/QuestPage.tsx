@@ -10,12 +10,17 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getBossGateChecklist, getQuestStatus } from "@/engine/unlockEngine";
 import { formatIsoZh } from "@/lib/date";
-import { QUEST_TYPE_LABEL } from "@/lib/formatting";
+import { EVIDENCE_TYPE_LABEL, QUEST_TYPE_LABEL } from "@/lib/formatting";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import { EvidenceForm } from "./EvidenceForm";
 import { WarmupCard } from "./WarmupCard";
 
-/** 工坊 / 任务详情 — 叙事、目标、DoD、证据、AI prompt、陷阱与护栏。 */
+/**
+ * 工坊 / 任务详情 — 像走进一间地下城工坊。
+ * 段落顺序（v0.2 规格）：
+ * 叙事钩子 → 目标 → 为什么重要 → DoD → 证据要求 → AI Prompt
+ * → 常见陷阱 → 当前禁止事项 → 面试讲法 → 提交证据 → 完成任务
+ */
 export function QuestPage() {
   const { questId } = useParams<{ questId: string }>();
   const completedIds = usePlayerStore(selectCompletedIds);
@@ -41,10 +46,11 @@ export function QuestPage() {
   const statusInfo = getQuestStatus(quest, completedIds);
   const completion = completions[quest.id];
   const isBoss = quest.type === "boss";
+  const requiredCount = quest.evidenceRequired.filter((e) => !e.optional).length;
 
   return (
     <div className="space-y-5 max-w-3xl">
-      {/* 面包屑 + 头部 */}
+      {/* ① 叙事钩子 + 头部 */}
       <div>
         <Link to="/map" className="inline-flex items-center gap-1 text-xs text-ink-faint hover:text-ink transition-colors mb-3">
           <Icon name="map" size={13} />
@@ -63,7 +69,7 @@ export function QuestPage() {
         <p className="mt-2 text-sm italic text-wood-dark text-balance">「{quest.narrativeHook}」</p>
       </div>
 
-      {/* 锁定态 */}
+      {/* 锁定态说明 */}
       {statusInfo.status === "locked" && (
         <Card className="p-5 border-wood-light/40 bg-cream-200/50">
           <p className="flex items-center gap-2 text-sm font-semibold text-ink mb-2">
@@ -97,7 +103,7 @@ export function QuestPage() {
       {/* 热身回顾（可做时才显示） */}
       {statusInfo.status === "available" && <WarmupCard quest={quest} />}
 
-      {/* 目标与意义 */}
+      {/* ②③ 目标与意义 */}
       <Card className="p-5 space-y-4">
         <div>
           <h2 className="text-sm font-bold text-ink mb-1.5 flex items-center gap-2">
@@ -135,7 +141,7 @@ export function QuestPage() {
         </Card>
       )}
 
-      {/* 完成定义 */}
+      {/* ④ 完成定义 */}
       <Card className="p-5">
         <h2 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
           <Icon name="check" size={16} className="text-moss-deep" />
@@ -151,36 +157,27 @@ export function QuestPage() {
         </ul>
       </Card>
 
-      {/* 证据：已完成显示回执，可做显示表单 */}
-      {statusInfo.status === "completed" && completion ? (
-        <Card className="p-5 border-moss/40 bg-moss/5">
-          <h2 className="text-sm font-bold text-ink mb-1 flex items-center gap-2">
-            <Icon name="chest" size={16} className="text-moss-deep" />
-            已提交的证据
-          </h2>
-          <p className="text-xs text-ink-faint mb-4">完成于 {formatIsoZh(completion.completedAt)}</p>
-          <dl className="space-y-3">
-            {quest.evidenceRequired.map((req) => {
-              const value = completion.evidence[req.id];
-              if (!value?.trim()) return null;
-              return (
-                <div key={req.id}>
-                  <dt className="text-xs font-semibold text-ink-soft mb-0.5">{req.label}</dt>
-                  <dd className="whitespace-pre-wrap rounded-lg bg-white/60 px-3 py-2 text-sm text-ink">{value}</dd>
-                </div>
-              );
-            })}
-          </dl>
-        </Card>
-      ) : (
-        statusInfo.status === "available" && (
-          <Card elevated className="p-5">
-            <EvidenceForm quest={quest} />
-          </Card>
-        )
-      )}
+      {/* ⑤ 证据要求概览 */}
+      <Card className="p-5">
+        <h2 className="text-sm font-bold text-ink mb-1 flex items-center gap-2">
+          <Icon name="chest" size={16} className="text-wood" />
+          证据要求（{requiredCount} 项必交{quest.evidenceRequired.length > requiredCount ? ` + ${quest.evidenceRequired.length - requiredCount} 项可选` : ""}）
+        </h2>
+        <p className="text-xs text-ink-faint mb-3">无证据，无精通 XP。做完后回到页面底部提交。</p>
+        <ul className="space-y-2">
+          {quest.evidenceRequired.map((req) => (
+            <li key={req.id} className="flex items-center gap-2.5 text-sm text-ink-soft">
+              <Badge tone="stone" className="!text-[10px] shrink-0">
+                {EVIDENCE_TYPE_LABEL[req.type]}
+              </Badge>
+              <span>{req.label}</span>
+              {req.optional && <span className="text-xs text-ink-faint">（可选）</span>}
+            </li>
+          ))}
+        </ul>
+      </Card>
 
-      {/* AI Prompt */}
+      {/* ⑥ AI Prompt */}
       <Card className="p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-ink flex items-center gap-2">
@@ -192,33 +189,28 @@ export function QuestPage() {
         <pre className="whitespace-pre-wrap rounded-xl bg-ink/[0.04] border border-wood-light/25 p-4 text-xs leading-relaxed text-ink-soft font-mono scrollbar-thin overflow-x-auto">
           {quest.aiPrompt}
         </pre>
+        {quest.resources.length > 0 && (
+          <div className="mt-3 border-t border-wood-light/25 pt-3">
+            <p className="text-xs font-semibold text-ink-faint mb-1.5">资源建议（只为解锁当前任务）</p>
+            <ul className="space-y-1">
+              {quest.resources.map((res, i) => (
+                <li key={i} className="text-xs">
+                  {res.url ? (
+                    <a href={res.url} target="_blank" rel="noreferrer" className="font-medium text-skyblue-deep hover:underline">
+                      {res.label} ↗
+                    </a>
+                  ) : (
+                    <span className="font-medium text-ink">{res.label}</span>
+                  )}
+                  {res.note && <span className="ml-2 text-ink-faint">{res.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Card>
 
-      {/* 资源 */}
-      {quest.resources.length > 0 && (
-        <Card className="p-5">
-          <h2 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
-            <Icon name="book" size={16} className="text-skyblue-deep" />
-            资源建议（只为解锁当前任务）
-          </h2>
-          <ul className="space-y-2">
-            {quest.resources.map((res, i) => (
-              <li key={i} className="text-sm">
-                {res.url ? (
-                  <a href={res.url} target="_blank" rel="noreferrer" className="font-medium text-skyblue-deep hover:underline">
-                    {res.label} ↗
-                  </a>
-                ) : (
-                  <span className="font-medium text-ink">{res.label}</span>
-                )}
-                {res.note && <span className="ml-2 text-xs text-ink-faint">{res.note}</span>}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {/* 常见陷阱 */}
+      {/* ⑦ 常见陷阱 */}
       <Card className="p-5">
         <h2 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
           <Icon name="warning" size={16} className="text-ember-deep" />
@@ -234,7 +226,7 @@ export function QuestPage() {
         </ul>
       </Card>
 
-      {/* 当前禁止事项（护栏） */}
+      {/* ⑧ 当前禁止事项（护栏） */}
       {quest.forbiddenForNow && quest.forbiddenForNow.length > 0 && (
         <Card className="p-5 border-plum/30 bg-plum/5">
           <h2 className="text-sm font-bold text-plum-deep mb-3 flex items-center gap-2">
@@ -244,7 +236,8 @@ export function QuestPage() {
           <p className="text-xs text-ink-faint mb-3">不是永远禁止——只是还不到时候。守住范围，就是守住进度。</p>
           <ul className="space-y-1.5">
             {quest.forbiddenForNow.map((item, i) => (
-              <li key={i} className="text-sm text-ink-soft">
+              <li key={i} className="flex items-start gap-2 text-sm text-ink-soft">
+                <Icon name="x" size={13} className="mt-0.5 shrink-0 text-plum" />
                 {item}
               </li>
             ))}
@@ -252,7 +245,7 @@ export function QuestPage() {
         </Card>
       )}
 
-      {/* 面试解释 + 技能 + 下一个风险 */}
+      {/* ⑨ 面试讲法 + 技能 + 下一个风险 */}
       <Card className="p-5 space-y-4">
         <div>
           <h2 className="text-sm font-bold text-ink mb-1.5 flex items-center gap-2">
@@ -283,6 +276,35 @@ export function QuestPage() {
           </p>
         </div>
       </Card>
+
+      {/* ⑩⑪ 提交证据 + 完成任务（或已完成回执） */}
+      {statusInfo.status === "completed" && completion ? (
+        <Card className="p-5 border-moss/40 bg-moss/5">
+          <h2 className="text-sm font-bold text-ink mb-1 flex items-center gap-2">
+            <Icon name="chest" size={16} className="text-moss-deep" />
+            已提交的证据
+          </h2>
+          <p className="text-xs text-ink-faint mb-4">完成于 {formatIsoZh(completion.completedAt)}</p>
+          <dl className="space-y-3">
+            {quest.evidenceRequired.map((req) => {
+              const value = completion.evidence[req.id];
+              if (!value?.trim()) return null;
+              return (
+                <div key={req.id}>
+                  <dt className="text-xs font-semibold text-ink-soft mb-0.5">{req.label}</dt>
+                  <dd className="whitespace-pre-wrap rounded-lg bg-white/60 px-3 py-2 text-sm text-ink">{value}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </Card>
+      ) : (
+        statusInfo.status === "available" && (
+          <Card elevated className="p-5 !border-ember/40" id="submit">
+            <EvidenceForm quest={quest} />
+          </Card>
+        )
+      )}
     </div>
   );
 }

@@ -2,14 +2,16 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { QUEST_BY_ID } from "@/content/quests";
+import { SKILL_BY_ID } from "@/content/skills";
 import { Icon } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { getDueCards, getUpcomingCount } from "@/engine/reviewEngine";
+import { getRecommendedQuest } from "@/engine/questEngine";
+import { getDueCards, getUpcomingCardInfo, getUpcomingCount } from "@/engine/reviewEngine";
 import { REVIEW_GOLD } from "@/engine/rewardEngine";
+import { WarmupCard } from "@/features/quests/WarmupCard";
 import { todayStr } from "@/lib/date";
 import { selectCompletedIds, usePlayerStore } from "@/store/playerStore";
 import type { ReviewRating } from "@/types/domain";
@@ -43,22 +45,7 @@ export function ReviewPage() {
     return (
       <div className="space-y-5">
         <ReviewHeader due={0} />
-        <EmptyState
-          icon="cards"
-          title="今天没有到期的卡片"
-          description={
-            completedIds.length <= 1
-              ? "完成任务后，相关的知识卡会进入卡组，按记忆曲线回来找你。先去做今天的任务吧。"
-              : upcoming > 0
-                ? `有 ${upcoming} 张卡在未来几天等着回来。今天可以安心做主线。`
-                : "完成更多任务来收集新的知识卡。"
-          }
-          action={
-            <Link to="/">
-              <Button variant="secondary">回炉火大厅</Button>
-            </Link>
-          }
-        />
+        <ReviewEmptyState upcoming={upcoming} completedIds={completedIds} />
       </div>
     );
   }
@@ -154,5 +141,74 @@ function ReviewHeader({ due }: { due: number }) {
         {due > 0 ? `还有 ${due} 张卡片等着你。先回忆，再翻面——挣扎本身就是记忆的锻造。` : "间隔重复让知识在将忘未忘时回来。"}
       </p>
     </header>
+  );
+}
+
+/**
+ * 空状态 v0.2 — 主动引导而非被动安慰：
+ * 解释卡从哪来、下一批卡在哪个任务里、并在合适时提供一张可选预习卡。
+ */
+function ReviewEmptyState({ upcoming, completedIds }: { upcoming: number; completedIds: string[] }) {
+  const upcomingInfo = getUpcomingCardInfo(completedIds);
+  const recommended = getRecommendedQuest(completedIds);
+
+  // 只有当推荐任务本身带卡时，才提供预习热身（不造假到期卡）
+  const showWarmup = !!recommended && upcomingInfo?.quest.id === recommended.id;
+
+  const topics = upcomingInfo
+    ? [
+        ...new Set(
+          upcomingInfo.quest.skills
+            .map((sid) => SKILL_BY_ID[sid]?.name)
+            .filter((n): n is string => !!n),
+        ),
+      ].slice(0, 5)
+    : [];
+
+  return (
+    <div className="max-w-xl mx-auto space-y-4">
+      <Card className="p-6 text-center">
+        <Icon name="cards" size={30} className="mx-auto mb-3 text-wood" />
+        <h2 className="text-base font-semibold text-ink mb-1.5">今天没有到期的卡片</h2>
+        <p className="text-sm text-ink-soft text-balance">
+          {upcoming > 0
+            ? `有 ${upcoming} 张卡在未来几天按记忆曲线回来。今天可以安心做主线。`
+            : "知识卡不是凭空出现的——每完成一个任务，你亲手用过的概念才会进入卡组。"}
+        </p>
+        {upcomingInfo && (
+          <div className="mt-4 rounded-xl bg-cream-200/60 p-4 text-left">
+            <p className="text-xs font-semibold text-ink-soft mb-1">下一批知识卡藏在</p>
+            <p className="text-sm font-bold text-ink">
+              {upcomingInfo.quest.code} · {upcomingInfo.quest.title}
+              <span className="ml-2 text-xs font-normal text-ink-faint">{upcomingInfo.cards.length} 张卡</span>
+            </p>
+            {topics.length > 0 && (
+              <p className="mt-1.5 text-xs text-ink-soft">
+                完成后入组：{topics.join("、")}
+              </p>
+            )}
+            <Link to={`/quests/${upcomingInfo.quest.id}`} className="inline-block mt-3">
+              <Button size="sm">
+                去做这个任务
+                <Icon name="chevron-right" size={14} />
+              </Button>
+            </Link>
+          </div>
+        )}
+        {!upcomingInfo && (
+          <Link to="/" className="inline-block mt-4">
+            <Button variant="secondary">回炉火大厅</Button>
+          </Link>
+        )}
+      </Card>
+
+      {/* 可选预习：推荐任务自带的卡（学前检索，不算复习） */}
+      {showWarmup && recommended && (
+        <div>
+          <p className="text-xs text-ink-faint mb-2 text-center">或者，先带着问题出发——</p>
+          <WarmupCard quest={recommended} />
+        </div>
+      )}
+    </div>
   );
 }
