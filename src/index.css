@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color: theme("colors.ink.DEFAULT");
+  }
+  body {
+    @apply bg-cream-100 font-body antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 85% -10%, rgba(246, 192, 102, 0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(163, 197, 133, 0.10), transparent 55%),
+      radial-gradient(800px 500px at 60% 110%, rgba(155, 126, 189, 0.08), transparent 55%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ember ring-offset-2 ring-offset-cream-100;
+  }
+  ::selection {
+    background: rgba(232, 163, 61, 0.35);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(139, 94, 60, 0.25);
+    border-radius: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

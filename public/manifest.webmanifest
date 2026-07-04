@@ -1,0 +1,17 @@
+{
+  "name": "仿真铸造学院 · The Simulation Forge Academy",
+  "short_name": "铸造学院",
+  "description": "一座属于你的职业转型 RPG 学院：从 Unity 生产工程师到确定性实时仿真工程师。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FBF6EC",
+  "theme_color": "#E8A33D",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+import type { BonusDungeon } from "@/types/domain";
+
+/**
+ * 奖励秘境商店 — 可选、短小、作品集相关，绝不阻塞主线。
+ * 达成前置任务后浮现，用金币开启。
+ */
+
+export const BONUS_DUNGEONS: BonusDungeon[] = [
+  {
+    id: "dungeon_chart",
+    name: "基准图表炼金师",
+    nameEn: "Benchmark Chart Alchemist",
+    purpose: "把 benchmark 的 CSV/JSON 变成漂亮的图表 / 报告查看器。",
+    portfolioValue: "让 Native Boundary Lab 的成果更可展示、更易传播。",
+    costGold: 300,
+    prerequisiteQuestIds: ["m7"],
+    scope: [
+      "读取一份已导出的 CSV/JSON（静态文件即可）。",
+      "渲染 2–3 张核心对比图（median/p95、GC alloc、calls/frame）。",
+      "一页式报告布局，可截图分享。",
+      "时间盒：2–4 小时，不做数据管道。",
+    ],
+    deliverable: "一个可打开的图表页面 + 一张分享用截图。",
+    completionRewards: { xp: 60, gold: 0, skillPoints: 0, reputation: 15, insight: 0 },
+    icon: "chart",
+  },
+  {
+    id: "dungeon_chatbot",
+    name: "AI 聊天迷你熔炉",
+    nameEn: "AI Chatbot Mini Forge",
+    purpose: "构建一个本地/mock 的职业导师聊天 UI（MVP 不接真实 AI API）。",
+    portfolioValue: "展示 UI 状态管理、prompt 设计与产品打磨能力。",
+    costGold: 250,
+    prerequisiteQuestIds: ["m3"],
+    scope: [
+      "聊天界面：消息流、输入框、打字指示。",
+      "回复来自本地脚本/规则，不接网络。",
+      "设计 3–5 条导师人格 prompt 模板。",
+      "时间盒：2–4 小时。",
+    ],
+    deliverable: "可交互的聊天 demo + prompt 模板文档。",
+    completionRewards: { xp: 50, gold: 0, skillPoints: 0, reputation: 10, insight: 1 },
+    icon: "chat",
+  },
+  {
+    id: "dungeon_replay",
+    name: "回放时间线玩具",
+    nameEn: "Replay Timeline Toy",
+    purpose: "在预计算帧数据上构建一个简单的时间线拖动器。",
+    portfolioValue: "为确定性仿真回放查看器（Act III）提前热身。",
+    costGold: 400,
+    prerequisiteQuestIds: ["m8"],
+    scope: [
+      "预生成 100–300 帧的简单状态数据（JSON）。",
+      "时间线 scrubber：播放/暂停/拖动。",
+      "帧状态的最小可视化（点阵或色块即可）。",
+      "时间盒：3–5 小时，不做真实仿真。",
+    ],
+    deliverable: "可拖动的回放 demo + 一段设计笔记。",
+    completionRewards: { xp: 80, gold: 0, skillPoints: 0, reputation: 15, insight: 1 },
+    icon: "timeline",
+  },
+  {
+    id: "dungeon_shader",
+    name: "着色器药剂实验室",
+    nameEn: "Shader Potion Lab",
+    purpose: "做一些小的视觉效果或 shader 风格的 UI 实验。",
+    portfolioValue: "保持视觉/游戏开发的手感与热情。",
+    costGold: 200,
+    prerequisiteQuestIds: ["m5"],
+    scope: [
+      "1–2 个小效果（渐变火焰、噪声流动、发光边框等）。",
+      "可以用 CSS/Canvas/Unity Shader Graph 任选。",
+      "时间盒：1–3 小时。",
+    ],
+    deliverable: "效果 GIF + 一句实现思路。",
+    completionRewards: { xp: 40, gold: 0, skillPoints: 0, reputation: 5, insight: 0 },
+    icon: "potion",
+  },
+  {
+    id: "dungeon_particles",
+    name: "粒子压力花园",
+    nameEn: "Particle Stress Garden",
+    purpose: "以安全的渐进档位探索可伸缩的可视化思路。",
+    portfolioValue: "培养性能可视化直觉。",
+    costGold: 500,
+    prerequisiteQuestIds: ["m7"],
+    scope: [
+      "档位制：500 → 2000 → 5000 个粒子，逐档验证帧率后才允许上探。",
+      "内置性能守卫：帧率低于阈值自动降档。",
+      "不追求极端数量——重点是测量与降级策略。",
+      "时间盒：3–5 小时。",
+    ],
+    deliverable: "分档 demo + 各档帧率记录表。",
+    completionRewards: { xp: 80, gold: 0, skillPoints: 0, reputation: 10, insight: 1 },
+    icon: "garden",
+  },
+];
+
+export const DUNGEON_BY_ID: Record<string, BonusDungeon> = Object.fromEntries(BONUS_DUNGEONS.map((d) => [d.id, d]));
