@@ -3,6 +3,9 @@
 name = "the-simulation-forge-academy"
 main = "worker/index.ts"
 compatibility_date = "2026-07-04"
+# 显式声明启用 workers.dev 路由——写在配置文件里，下次部署时会覆盖控制台里那个开关的状态，
+# 避免受控制台 UI 偶发问题（比如开关点击没反应）影响。
+workers_dev = true
 
 [assets]
 directory = "./dist"
