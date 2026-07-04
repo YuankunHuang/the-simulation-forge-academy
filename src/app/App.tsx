@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { RewardCeremony } from "@/features/rewards/RewardCeremony";
 import { pageVariants } from "@/lib/motion";
+import { useCloudAutoSync } from "@/store/cloudSyncStore";
 import { APP_ROUTES } from "./routes";
 import { Providers } from "./providers";
 
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useCloudAutoSync();
   return (
     <Providers>
       {/* HashRouter：GitHub Pages 等静态托管无需服务端路由配置 */}

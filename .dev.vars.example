@@ -1,0 +1,4 @@
+# 本地用 `npm run worker:dev` 联调 worker/ 时，复制这个文件为 .dev.vars（已在 .gitignore 里，不会被提交），
+# 填一个你自己的口令即可。生产环境的 SYNC_PASSPHRASE 在 Cloudflare 控制台的
+# Worker → Settings → Variables and Secrets 里单独设置，和这个本地文件无关。
+SYNC_PASSPHRASE=change-me-local-only

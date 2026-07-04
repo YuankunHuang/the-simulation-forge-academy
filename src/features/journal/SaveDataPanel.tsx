@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { todayStr } from "@/lib/date";
 import { usePlayerStore } from "@/store/playerStore";
+import { useCloudSyncStore } from "@/store/cloudSyncStore";
+import { CloudSyncPanel } from "./CloudSyncPanel";
 
-/** 存档面板 — 导出/导入 JSON 与重置。数据只属于你，只存在你的浏览器里。 */
+/** 存档面板 — 导出/导入 JSON、云端同步与重置。 */
 export function SaveDataPanel({ completedCount }: { completedCount: number }) {
   const exportSave = usePlayerStore((s) => s.exportSave);
   const importSave = usePlayerStore((s) => s.importSave);
   const resetAll = usePlayerStore((s) => s.resetAll);
+  const cloudConnected = useCloudSyncStore((s) => !!s.passphrase);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
@@ -49,12 +52,16 @@ export function SaveDataPanel({ completedCount }: { completedCount: number }) {
 
   return (
     <div className="space-y-4 max-w-xl">
+      <CloudSyncPanel />
+
       <Card className="p-5 space-y-4">
         <div>
           <h2 className="text-sm font-bold text-ink mb-1">存档管理</h2>
           <p className="text-xs text-ink-soft">
-            所有数据只保存在你自己的浏览器（localStorage）里，没有云端、没有账号。当前进度：已完成 {completedCount} 个任务。
-            建议定期导出 JSON 备份。
+            {cloudConnected
+              ? "本地数据保存在浏览器（localStorage）里，同时已连接云端同步（见上）。"
+              : "所有数据只保存在你自己的浏览器（localStorage）里，没有云端、没有账号。"}
+            当前进度：已完成 {completedCount} 个任务。建议定期导出 JSON 备份。
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">

@@ -1,0 +1,18 @@
+# Cloudflare Workers（含静态资源）配置。
+# name 必须和 Cloudflare 控制台里 Worker/项目名完全一致，否则 Workers Builds 会构建失败。
+name = "the-simulation-forge-academy"
+main = "worker/index.ts"
+compatibility_date = "2026-07-04"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[kv_namespaces]]
+binding = "SFA_KV"
+id = "3fe03142a0af4f53b1111b6701890e5c"
+
+# SYNC_PASSPHRASE 是 secret，不写在这里——部署后去 Worker 的
+# Settings → Variables and Secrets 里加密添加，然后重新触发一次部署即可生效。
+# 本地开发时，`wrangler dev` 会读取项目根目录的 .dev.vars 文件（已在 .gitignore 里）。

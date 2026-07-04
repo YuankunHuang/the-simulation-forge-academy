@@ -13,6 +13,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/tests/**/*.test.{ts,tsx}"],
+    // worker/ 独立于 src 的 tsconfig 项目之外（需要 Workers 运行时类型，和主应用的 DOM 类型冲突），
+    // 单独把它的测试也纳入同一次 `npm test`，但不会被 `tsc --noEmit`（只 include "src"）触碰到。
+    include: ["src/tests/**/*.test.{ts,tsx}", "worker/**/*.test.ts"],
   },
 });
