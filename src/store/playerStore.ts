@@ -102,20 +102,38 @@ export const usePlayerStore = create<PlayerStore>()(
         const walletAfter = applyRewards(s.wallet, bundle);
         const levelAfter = levelForXp(walletAfter.xp);
 
-        // 把第一条反思写进篝火日志
-        const reflectionReq = quest.evidenceRequired.find((r) => r.type === "text_reflection");
-        const reflectionText = reflectionReq ? (fields[reflectionReq.id] ?? "").trim() : "";
-        const journalEntry = reflectionText
-          ? [
-              {
-                id: uid("j"),
-                date: today,
-                kind: "reflection" as const,
-                questId,
-                text: reflectionText,
-              },
-            ]
-          : [];
+        // 篝火日志：普通任务记第一条反思；Boss 之门把整场答辩存为面试防线记录
+        const newJournalEntries: PlayerState["journal"] = [];
+        if (quest.type === "boss") {
+          const defenseText = quest.evidenceRequired
+            .map((req) => {
+              const value = (fields[req.id] ?? "").trim();
+              return value ? `【${req.label}】\n${value}` : "";
+            })
+            .filter(Boolean)
+            .join("\n\n");
+          if (defenseText) {
+            newJournalEntries.push({
+              id: uid("j"),
+              date: today,
+              kind: "boss_defense",
+              questId,
+              text: defenseText,
+            });
+          }
+        } else {
+          const reflectionReq = quest.evidenceRequired.find((r) => r.type === "text_reflection");
+          const reflectionText = reflectionReq ? (fields[reflectionReq.id] ?? "").trim() : "";
+          if (reflectionText) {
+            newJournalEntries.push({
+              id: uid("j"),
+              date: today,
+              kind: "reflection",
+              questId,
+              text: reflectionText,
+            });
+          }
+        }
 
         const ceremony: CeremonyPayload = {
           questId,
@@ -123,6 +141,7 @@ export const usePlayerStore = create<PlayerStore>()(
           artifactIds: artifacts.map((a) => a.id),
           skillsMadeAvailable: newSkills.map((n) => n.id),
           reviewCardIds: cardsUnlockedBy(questId).map((c) => c.id),
+          journalEntriesCreated: newJournalEntries.length,
           newTitle: titleAfter.titleEn !== titleBefore ? `${titleAfter.title} · ${titleAfter.titleEn}` : undefined,
           leveledUpTo: levelAfter > levelBefore ? levelAfter : undefined,
         };
@@ -133,7 +152,7 @@ export const usePlayerStore = create<PlayerStore>()(
             [questId]: { questId, completedAt: now, evidence: fields },
           },
           wallet: walletAfter,
-          journal: [...journalEntry, ...s.journal],
+          journal: [...newJournalEntries, ...s.journal],
           activeDates: markActive(s, today),
           lastActiveDate: today,
           sprint: s.sprint

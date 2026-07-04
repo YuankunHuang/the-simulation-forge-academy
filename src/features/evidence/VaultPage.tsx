@@ -100,15 +100,31 @@ function ArtifactDetail({ artifact }: { artifact: Artifact }) {
   const quest = QUEST_BY_ID[artifact.sourceQuestId];
   const completion = completions[artifact.sourceQuestId];
 
-  const sections: Array<{ title: string; body: string; copyText: string }> = [
+  // 分区顺序：证明 → 职业价值 →（已提交证据）→ LinkedIn → 博客 → 作品集 → 简历 → 面试
+  const identitySections: Array<{ title: string; body: string; copyText: string }> = [
     { title: "它证明了什么", body: artifact.proves, copyText: artifact.proves },
     { title: "职业价值", body: artifact.careerValue, copyText: artifact.careerValue },
-    { title: "面试讲法", body: prompts.interview, copyText: prompts.interview },
-    { title: "简历要点（可直接粘贴）", body: prompts.resume, copyText: prompts.resume },
+  ];
+  const showcaseSections: Array<{ title: string; body: string; copyText: string }> = [
     { title: "LinkedIn 建议", body: artifact.linkedinSuggestion, copyText: prompts.linkedin },
     { title: "博客建议", body: artifact.blogSuggestion, copyText: prompts.blog },
-    { title: "作品集建议", body: artifact.portfolioSuggestion, copyText: artifact.portfolioSuggestion },
+    { title: "作品集文案", body: artifact.portfolioSuggestion, copyText: artifact.portfolioSuggestion },
+    { title: "简历要点（可直接粘贴）", body: prompts.resume, copyText: prompts.resume },
+    { title: "面试讲法", body: prompts.interview, copyText: prompts.interview },
   ];
+
+  const renderSection = (sec: { title: string; body: string; copyText: string }) => (
+    <div key={sec.title} className="rounded-xl bg-cream-200/50 p-4">
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <h3 className="text-xs font-bold text-ink-soft">{sec.title}</h3>
+        <CopyButton
+          text={sec.copyText}
+          label={sec.title.includes("LinkedIn") || sec.title.includes("博客") ? "复制起草 Prompt" : "复制"}
+        />
+      </div>
+      <p className="text-sm text-ink whitespace-pre-wrap">{sec.body}</p>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -125,6 +141,8 @@ function ArtifactDetail({ artifact }: { artifact: Artifact }) {
           </span>
         ))}
       </div>
+
+      {identitySections.map(renderSection)}
 
       {/* 铸造它的证据 */}
       {completion && quest && (
@@ -148,19 +166,7 @@ function ArtifactDetail({ artifact }: { artifact: Artifact }) {
         </div>
       )}
 
-      {/* 展示内容：每条都可复制（LinkedIn/博客复制的是 AI 起草 prompt） */}
-      {sections.map((sec) => (
-        <div key={sec.title} className="rounded-xl bg-cream-200/50 p-4">
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <h3 className="text-xs font-bold text-ink-soft">{sec.title}</h3>
-            <CopyButton
-              text={sec.copyText}
-              label={sec.title.includes("LinkedIn") || sec.title.includes("博客") ? "复制起草 Prompt" : "复制"}
-            />
-          </div>
-          <p className="text-sm text-ink whitespace-pre-wrap">{sec.body}</p>
-        </div>
-      ))}
+      {showcaseSections.map(renderSection)}
       <p className="text-[11px] text-ink-faint">
         提示：LinkedIn / 博客的复制按钮给出的是完整起草 Prompt，交给 AI 生成草稿。学院不会自动发布任何内容。
       </p>

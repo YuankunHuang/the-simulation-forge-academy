@@ -34,7 +34,8 @@ export function SprintPanel() {
             {nextQuest && (
               <Link to={`/quests/${nextQuest.id}`}>
                 <Button size="sm">
-                  继续下一关
+                  {nextQuest.type === "boss" && <Icon name="shield" size={13} />}
+                  {nextQuest.type === "boss" ? `Boss 之门：${nextQuest.title}` : "继续下一关"}
                   <Icon name="chevron-right" size={14} />
                 </Button>
               </Link>

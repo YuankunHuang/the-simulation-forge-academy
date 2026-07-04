@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Icon } from "@/components/icons";
 
-export function CopyButton({ text, label = "复制" }: { text: string; label?: string }) {
+export function CopyButton({
+  text,
+  label = "复制",
+  onCopied,
+}: {
+  text: string;
+  label?: string;
+  onCopied?: () => void;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -17,6 +25,7 @@ export function CopyButton({ text, label = "复制" }: { text: string; label?: s
       document.body.removeChild(ta);
     }
     setCopied(true);
+    onCopied?.();
     window.setTimeout(() => setCopied(false), 1800);
   };
 

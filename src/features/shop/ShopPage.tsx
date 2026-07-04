@@ -26,11 +26,15 @@ export function ShopPage() {
             奖励秘境商店
           </h1>
           <p className="text-sm text-ink-soft mt-1">
-            可选的小冒险：短小、独立、对作品集有用。它们永远不会阻塞主线——纯粹的甜点。
+            可选的小冒险：短小、独立、对作品集有用。
           </p>
         </div>
         <StatPill icon="coin" value={gold} label="金币" tone="gold" />
       </header>
+
+      <p className="rounded-xl bg-cream-200/60 border border-wood-light/25 px-4 py-2.5 text-xs text-wood-dark">
+        秘境永远不阻塞主线——它们只是学有余力时的奖励副本。
+      </p>
 
       <div className="grid gap-4 md:grid-cols-2">
         {BONUS_DUNGEONS.map((dungeon) => (
@@ -53,20 +57,31 @@ function DungeonCard({ dungeon }: { dungeon: BonusDungeon }) {
   const unlocked = dungeon.prerequisiteQuestIds.every((q) => completedIds.includes(q));
   const prereqLabels = dungeon.prerequisiteQuestIds.map((id) => QUEST_BY_ID[id]?.code ?? id).join("、");
 
-  // 剪影态：前置未达成
+  // 预告态：前置未达成 — 露出名字与诱惑，但保持锁定
   if (!unlocked) {
     return (
       <Card className="p-5 border-dashed border-wood-light/30 bg-cream-200/40">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-wood/10 text-ink-faint">
-            <Icon name="fog" size={20} />
-          </span>
-          <div>
-            <p className="text-sm font-bold text-ink-faint">？？？</p>
-            <p className="text-xs text-ink-faint">迷雾中的秘境</p>
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-wood/10 text-ink-faint">
+              <Icon name="lock" size={18} />
+            </span>
+            <div>
+              <p className="text-sm font-bold text-ink-faint">{dungeon.name}</p>
+              <p className="text-[11px] text-ink-faint">{dungeon.nameEn}</p>
+            </div>
           </div>
+          <Badge tone="stone">
+            <Icon name="coin" size={11} />
+            {formatNumber(dungeon.costGold)}
+          </Badge>
         </div>
-        <p className="text-xs text-ink-faint">完成 {prereqLabels} 后浮现</p>
+        <p className="text-xs text-ink-faint mb-1.5 italic">{dungeon.purpose}</p>
+        <p className="text-[11px] text-ink-faint mb-2">
+          <span className="font-semibold">作品集价值：</span>
+          {dungeon.portfolioValue}
+        </p>
+        <p className="text-[11px] font-medium text-wood-dark">解锁条件：完成 {prereqLabels}</p>
       </Card>
     );
   }

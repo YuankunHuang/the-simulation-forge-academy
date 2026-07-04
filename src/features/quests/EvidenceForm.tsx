@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -11,12 +11,22 @@ import type { Quest } from "@/types/domain";
 /**
  * 证据提交表单 — 核心规则的执行处：必填证据齐全前，完成按钮保持禁用。
  */
-export function EvidenceForm({ quest }: { quest: Quest }) {
+export function EvidenceForm({
+  quest,
+  onValidityChange,
+}: {
+  quest: Quest;
+  onValidityChange?: (valid: boolean) => void;
+}) {
   const completeQuest = usePlayerStore((s) => s.completeQuest);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const validation = validateEvidence(quest, fields);
+
+  useEffect(() => {
+    onValidityChange?.(validation.ok);
+  }, [validation.ok, onValidityChange]);
 
   const handleChange = (id: string, value: string) => {
     setFields((prev) => ({ ...prev, [id]: value }));

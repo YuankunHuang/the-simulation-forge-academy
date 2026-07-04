@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { REGION_BY_ID } from "@/content/campaigns";
-import { NPC_NAME, pickDialogue } from "@/content/npcDialogues";
+import { NPC_NAME, pickDialogue, pickQuestFocusDialogue } from "@/content/npcDialogues";
 import { Icon, MiraAvatar, type IconName } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -40,12 +40,14 @@ export function HallPage() {
   const currentRegion = getCurrentRegion(completedIds);
   const dueCount = getDueCards(reviewStates, completedIds, today).length;
 
-  // 米拉问候：回归 > 冲刺 > 模式 > Boss 前 > 时段
+  // 米拉主句：回归 > 冲刺 > 低能量 > 任务专属 > Boss 前 > 全清 > 时段问候
   const isReturning = activeDates.length > 0 && momentum.awayDays >= 3;
+  const questFocus = recommended ? pickQuestFocusDialogue(recommended.id)?.text : undefined;
   let greeting = pickDialogue(`greeting_${timeOfDay()}`, daySeed)?.text ?? "";
   if (isReturning) greeting = pickDialogue("welcome_back", daySeed)?.text ?? greeting;
   else if (sprint) greeting = pickDialogue("deep_start", daySeed)?.text ?? greeting;
   else if (energyMode === "low") greeting = pickDialogue("low_energy", daySeed)?.text ?? greeting;
+  else if (questFocus) greeting = questFocus;
   else if (recommended?.type === "boss") greeting = pickDialogue("boss_ahead", daySeed)?.text ?? greeting;
   else if (!recommended) greeting = pickDialogue("all_clear", daySeed)?.text ?? greeting;
   const flavor = pickDialogue("region_flavor", daySeed, currentRegion.id)?.text;
@@ -105,6 +107,17 @@ export function HallPage() {
                   {REGION_BY_ID[recommended.regionId]?.name}
                   {recommended.estimate && ` · 预计 ${recommended.estimate}`}
                 </span>
+                {sprint && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-ember/15 px-2 py-0.5 text-[11px] font-semibold text-ember-deep">
+                    <Icon name="flame" size={11} />
+                    冲刺中
+                  </span>
+                )}
+                {!sprint && energyMode === "low" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-skyblue/15 px-2 py-0.5 text-[11px] font-semibold text-skyblue-deep">
+                    低能量节奏
+                  </span>
+                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-bold text-ink mb-2">

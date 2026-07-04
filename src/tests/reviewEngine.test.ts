@@ -89,10 +89,10 @@ describe("reviewEngine · 卡片来源引导（v0.2）", () => {
     expect(cardsUnlockedBy("m0")).toHaveLength(0);
   });
 
-  it("新玩家的下一批卡指向 M2（世界顺序上第一个带卡的未完成任务）", () => {
+  it("新玩家的下一批卡指向 R0（世界顺序上第一个带卡的未完成任务）", () => {
     const info = getUpcomingCardInfo([]);
     expect(info).not.toBeNull();
-    expect(info!.quest.id).toBe("m2");
+    expect(info!.quest.id).toBe("q_r0");
     expect(info!.cards.length).toBeGreaterThan(0);
   });
 
@@ -102,14 +102,15 @@ describe("reviewEngine · 卡片来源引导（v0.2）", () => {
   });
 
   it("全部带卡任务完成后返回 null", () => {
-    const allWithCards = ["m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"];
+    const allWithCards = ["q_r0", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10", "b2", "b4", "b5"];
     expect(getUpcomingCardInfo(allWithCards)).toBeNull();
   });
 });
 
 describe("reviewEngine · 热身回顾", () => {
   it("无到期老卡时，用任务自己的卡做预习提问", () => {
-    const warmup = getWarmupCard(QUEST_BY_ID.m2, {}, ["q_r0", "m0", "m1"], TODAY);
+    // 空档案：卡组里没有任何老卡，M2 用自己的卡做学前检索
+    const warmup = getWarmupCard(QUEST_BY_ID.m2, {}, [], TODAY);
     expect(warmup).not.toBeNull();
     expect(warmup!.kind).toBe("preview");
     expect(warmup!.card.questId).toBe("m2");

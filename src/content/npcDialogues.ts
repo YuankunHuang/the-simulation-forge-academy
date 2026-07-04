@@ -78,6 +78,56 @@ export const NPC_DIALOGUES: NPCDialogue[] = [
     text: "冲刺开始。别忘了每完成一关就提交证据，Boss 之门依然只认实力。祝你今天铸得痛快。",
   },
 
+  // ---- 任务感知台词（quest_focus：按当前推荐任务说话） ----
+  {
+    id: "d_focus_r0",
+    context: "quest_focus",
+    questId: "q_r0",
+    text: "先点燃炉火。今天的目标不是推进技术，而是确认你已经进入这条转职路线。",
+  },
+  {
+    id: "d_focus_m0",
+    context: "quest_focus",
+    questId: "m0",
+    text: "今天不是写复杂代码，而是给整个边界实验室打地基。repo、README、docs skeleton，就是你的第一块证据。",
+  },
+  {
+    id: "d_focus_m1",
+    context: "quest_focus",
+    questId: "m1",
+    text: "native runtime 必须先能独立构建，Unity 才有东西可以连接。今天让 C++ 侧发出第一枚版本信号。",
+  },
+  {
+    id: "d_focus_m2",
+    context: "quest_focus",
+    questId: "m2",
+    text: "现在 native runtime 已经能说话了。今天让 Unity 通过 P/Invoke 听见它。",
+  },
+  {
+    id: "d_focus_m3",
+    context: "quest_focus",
+    questId: "m3",
+    text: "桥能通还不够。今天要定义谁拥有 native context，谁负责释放，谁不该碰 raw IntPtr。",
+  },
+  {
+    id: "d_focus_boss_bridge",
+    context: "quest_focus",
+    questId: "boss_bridge",
+    text: "你已经打通第一道信号桥。现在证明你能解释它，而不是只跑通它。",
+  },
+  {
+    id: "d_focus_m4",
+    context: "quest_focus",
+    questId: "m4",
+    text: "平原的第一块石碑：让 C# 和 C++ 对同一块内存说出同一句话。契约要写进编译器，不是注释里。",
+  },
+  {
+    id: "d_focus_m5",
+    context: "quest_focus",
+    questId: "m5",
+    text: "一次渡桥，运送整支军团。今天把 N 次边界穿越合并成 1 次。",
+  },
+
   // ---- Boss 之门在前 ----
   {
     id: "d_boss_1",
@@ -158,10 +208,21 @@ export const NPC_DIALOGUES: NPCDialogue[] = [
     regionId: "observatory_annex",
     text: "望远镜可以看很远，但脚要站在稳固的桥上。可选的风景，克制地欣赏。",
   },
+  {
+    id: "d_region_basecamp",
+    context: "region_flavor",
+    regionId: "production_basecamp",
+    text: "营地不赶路。这里只做一件事：把五年生产直觉，变成有名字的证据。",
+  },
 ];
 
 export function pickDialogue(context: NPCDialogue["context"], seed: number, regionId?: string): NPCDialogue | null {
   const pool = NPC_DIALOGUES.filter((d) => d.context === context && (!d.regionId || d.regionId === regionId));
   if (pool.length === 0) return null;
   return pool[Math.abs(seed) % pool.length];
+}
+
+/** 当前推荐任务的专属台词；没有专属台词时返回 null（回退到时段问候）。 */
+export function pickQuestFocusDialogue(questId: string): NPCDialogue | null {
+  return NPC_DIALOGUES.find((d) => d.context === "quest_focus" && d.questId === questId) ?? null;
 }

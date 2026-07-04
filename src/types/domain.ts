@@ -53,7 +53,7 @@ export interface Quest {
   type: QuestType;
   /** 全世界线性顺序，用于推荐与“继续冒险” */
   order: number;
-  /** 可选支线（如 M13），不阻塞主线推荐 */
+  /** 可选支线（如 M13、生产经验营地），不阻塞主线推荐 */
   optional?: boolean;
   narrativeHook: string;
   objective: string;
@@ -75,6 +75,16 @@ export interface Quest {
   /** “当前禁止事项”护栏面板 */
   forbiddenForNow?: string[];
   estimate?: string;
+  /** 概念链：本任务涉及的概念按依赖顺序排列（渲染为 A → B → C） */
+  conceptMap?: string[];
+  /** 需要创建 / 修改的文件与产物清单 */
+  filesToCreate?: string[];
+  /** 分步执行计划（在工坊内按序号渲染） */
+  steps?: string[];
+  /** 调试笔记：卡住时的排查线索 */
+  debuggingNotes?: string[];
+  /** 公开展示种子：这一步如何进入 README / LinkedIn / 作品集 */
+  publicShowcaseSeed?: string;
 }
 
 export interface Region {
@@ -89,6 +99,8 @@ export interface Region {
   description: string;
   bossQuestId?: string;
   icon: string;
+  /** 支线区域：不参与线性迷雾推导，独立解锁（如生产经验营地） */
+  side?: boolean;
 }
 
 export interface Campaign {
@@ -196,6 +208,7 @@ export type DialogueContext =
   | "boss_ahead"
   | "quest_complete"
   | "region_flavor"
+  | "quest_focus"
   | "all_clear";
 
 export interface NPCDialogue {
@@ -203,6 +216,8 @@ export interface NPCDialogue {
   context: DialogueContext;
   text: string;
   regionId?: string;
+  /** quest_focus 台词绑定的任务 */
+  questId?: string;
 }
 
 export interface QuestCompletion {
@@ -222,7 +237,7 @@ export interface JournalEntry {
   id: string;
   /** YYYY-MM-DD */
   date: string;
-  kind: "reflection" | "low_energy" | "note" | "dungeon";
+  kind: "reflection" | "low_energy" | "note" | "dungeon" | "boss_defense" | "showcase";
   questId?: string;
   text: string;
 }
@@ -234,6 +249,8 @@ export interface SessionRecap {
   questIds: string[];
   artifactIds: string[];
   skillIdsAvailable: string[];
+  /** 本次冲刺让哪些复习卡进入卡组 */
+  reviewCardIds: string[];
   totals: RewardBundle;
   showcaseSuggestions: string[];
   nextRisk?: string;
@@ -255,6 +272,8 @@ export interface CeremonyPayload {
   skillsMadeAvailable: string[];
   /** 本次完成让哪些复习卡进入卡组 */
   reviewCardIds: string[];
+  /** 本次完成写入篝火日志的条目数（反思 / Boss 答辩） */
+  journalEntriesCreated: number;
   newTitle?: string;
   leveledUpTo?: number;
 }

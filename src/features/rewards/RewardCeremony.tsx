@@ -46,6 +46,11 @@ export function RewardCeremony() {
     navigate("/vault");
   };
 
+  const handleViewMap = () => {
+    closeCeremony();
+    navigate("/map");
+  };
+
   const handleEndSprint = () => {
     endSprint();
     closeCeremony();
@@ -191,6 +196,25 @@ export function RewardCeremony() {
               </div>
             )}
 
+            {/* 篝火日志回执 */}
+            {ceremony.journalEntriesCreated > 0 && (
+              <p className="mb-4 flex items-center gap-1.5 text-xs text-ink-soft">
+                <Icon name="book" size={13} className="shrink-0 text-wood" />
+                {quest.type === "boss" ? "答辩全文已存入篝火日志（面试防线）。" : "你的反思已写入篝火日志。"}
+              </p>
+            )}
+
+            {/* 公开展示提醒 */}
+            {quest.publicShowcaseSeed && (
+              <div className="mb-4 rounded-xl bg-plum/5 border border-plum/20 p-3.5">
+                <p className="text-xs font-bold text-plum-deep mb-1 flex items-center gap-1.5">
+                  <Icon name="sparkle" size={12} />
+                  公开展示种子
+                </p>
+                <p className="text-xs text-ink-soft">{quest.publicShowcaseSeed}</p>
+              </div>
+            )}
+
             {/* 下一步 */}
             <div className="rounded-xl bg-cream-200/60 p-4 mb-5">
               {nextQuest ? (
@@ -222,7 +246,7 @@ export function RewardCeremony() {
             <div className="flex flex-col sm:flex-row gap-2">
               {nextQuest && (
                 <Button className="flex-1" onClick={handleContinue}>
-                  继续下一关
+                  {nextQuest.type === "boss" ? "挑战 Boss 之门" : "继续下一关"}
                   <Icon name="chevron-right" size={16} />
                 </Button>
               )}
@@ -236,6 +260,10 @@ export function RewardCeremony() {
                   查看证据宝库
                 </Button>
               )}
+              <Button variant="ghost" className="flex-1" onClick={handleViewMap}>
+                <Icon name="map" size={16} />
+                查看地图
+              </Button>
             </div>
             {sprint && sprint.questIds.length > 0 && (
               <button

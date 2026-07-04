@@ -51,7 +51,9 @@ export function RegionSection({
               {region.name} <span className="text-xs font-normal text-ink-faint">{region.nameEn}</span>
             </p>
             <p className="mt-1 text-xs text-ink-faint italic">{region.vibe}</p>
-            <p className="mt-2 text-xs text-ink-faint">完成上一区域的 Boss 之门后解锁</p>
+            <p className="mt-2 text-xs text-ink-faint">
+              {region.side ? "点燃炉火（R0）后开放 · 可选支线，不阻塞主线" : "完成上一区域的 Boss 之门后解锁"}
+            </p>
           </div>
         </div>
       </Card>
@@ -94,6 +96,7 @@ export function RegionSection({
           <h3 className="text-base font-bold text-ink flex items-center gap-2 flex-wrap">
             {region.name} <span className="text-xs font-normal text-ink-faint">{region.nameEn}</span>
             {isCurrentRegion && <Badge tone="ember">当前区域</Badge>}
+            {region.side && <Badge tone="stone">可选支线</Badge>}
           </h3>
           <p className="text-xs text-ink-soft mt-0.5">{region.description}</p>
         </div>
@@ -166,7 +169,8 @@ export function RegionSection({
 
           return (
             <Fragment key={quest.id}>
-              {i > 0 && (
+              {/* 支线区域的任务相互独立，不画顺序箭头 */}
+              {i > 0 && !region.side && (
                 <Icon
                   name="chevron-right"
                   size={12}
@@ -174,6 +178,7 @@ export function RegionSection({
                   aria-hidden="true"
                 />
               )}
+              {i > 0 && region.side && <span className="w-1.5" aria-hidden="true" />}
               {chip}
             </Fragment>
           );

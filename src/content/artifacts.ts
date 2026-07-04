@@ -1,8 +1,25 @@
 import type { Artifact } from "@/types/domain";
 
-/** 证据宝库 — 14 件神器种子数据（M0–M13）。 */
+/** 证据宝库 — 神器种子数据：R0 誓约、M0–M13、桥村之印、营地战利品。 */
 
 export const ARTIFACTS: Artifact[] = [
+  {
+    id: "art_r0",
+    name: "炉火誓约",
+    nameEn: "Hearth Oath",
+    rarity: "uncommon",
+    sourceQuestId: "q_r0",
+    teaser: "第一簇火苗在等一个亲手点燃它的人。",
+    proves: "你已郑重承诺一场具体的职业转型，并接受证据驱动的推进规则：从 Unity 生产工程师走向确定性仿真基础设施工程师，每一步都以可验证的产物为凭。",
+    careerValue: "方向感本身就是稀缺能力。当面试官问『你为什么学 C++/为什么做这个项目』时，一个有誓约、有路线、有证据系统的回答，与『我觉得该学点底层』有云泥之别。",
+    skillsProven: ["职业北极星", "证据驱动学习", "长期投入承诺"],
+    linkedinSuggestion: "暂不发布。誓约是内在锚点——等 M0 立项后，把它化进项目 README 的 thesis 段落再亮相。",
+    blogSuggestion: "可以开一篇『转型日志 #0』的草稿：为什么一个 5 年 Unity 开发者决定亲手铸造 native 边界，先存着，等第一批技术证据齐了再发。",
+    portfolioSuggestion: "在作品集『关于我』区写一句话定位：Unity 生产工程师 → 确定性仿真基础设施工程师（进行中，证据驱动）。",
+    resumeBullet: "以证据驱动的方式系统推进 Unity → C++ 运行时的职业转型：每个里程碑均产出可验证的代码、文档与基准产物。",
+    interviewExplanation: "我用一套证据系统管理职业转型：明确身份路径，每一步都必须产出可指认的 artifact——没有证据就不算掌握。",
+    icon: "oath",
+  },
   {
     id: "art_m0",
     name: "奠基石：边界实验室脚手架",
@@ -70,6 +87,23 @@ export const ARTIFACTS: Artifact[] = [
     resumeBullet: "设计基于 opaque handle 的跨 ABI 资源管理方案，C# IDisposable 封装保证生命周期安全与幂等释放，所有权模型文档化。",
     interviewExplanation: "我使用 opaque handle 与显式生命周期，而不是让 C++ 对象跨 ABI 泄漏。C# wrapper 私有持有 IntPtr，Dispose 幂等，无效句柄行为有明确定义。",
     icon: "handle",
+  },
+  {
+    id: "art_boss_bridge",
+    name: "桥村之印",
+    nameEn: "Bridge Village Seal",
+    rarity: "epic",
+    sourceQuestId: "boss_bridge",
+    teaser: "石门上有五道刻痕。集齐五件证物、答出五问的人，将获得此印。",
+    proves: "你能端到端地解释第一座 managed/native 桥：为什么用 C ABI、为什么用 opaque handle、为什么用 IDisposable、为什么 C++ 对象不跨 ABI、以及这一切如何通向确定性仿真。不只是跑通，而是讲得清。",
+    careerValue: "『能构建』和『能答辩』之间隔着一次晋升。这枚印章代表你完成了第一次完整的技术答辩——它的五问五答可以直接搬进任何系统工程面试。",
+    skillsProven: ["架构答辩", "C ABI 契约", "生命周期设计", "技术叙事"],
+    linkedinSuggestion: "第一条值得考虑公开的帖子：『我给 Unity 造了一座通往 C++ 的桥』——五句旅程总结 + 一个反直觉发现（比如 extern \"C\" 的必要性），配 HelloNative 截图。",
+    blogSuggestion: "写《从零打通 Unity ↔ C++ 的第一座桥》：以五个边界之问为章节骨架（C ABI / opaque handle / IDisposable / 不跨 ABI 的 C++ / 通向确定性仿真），用你的真实答辩内容填充。",
+    portfolioSuggestion: "在项目卡片加『里程碑 1 完成』徽章：native 构建 → C ABI 导出 → P/Invoke → 生命周期契约，附五问五答链接。",
+    resumeBullet: "完成 Unity/C++ 边界的端到端设计与答辩：CMake 原生库、稳定 C ABI 导出、P/Invoke 集成与 opaque handle 生命周期契约。",
+    interviewExplanation: "我构建并能完整解释第一座 managed/native 桥：native 构建、导出 C ABI、P/Invoke 调用、opaque context 与 managed 生命周期封装——以及它为什么是通往 headless 仿真内核的第一步。",
+    icon: "seal2",
   },
   {
     id: "art_m4",
@@ -241,6 +275,41 @@ export const ARTIFACTS: Artifact[] = [
     resumeBullet: "在核心边界架构稳定后，实现 XR 位姿诊断 / render-thread 事件扩展示例并明确其边界。",
     interviewExplanation: "我在核心桥梁稳固之后，探索了 engine/XR 相邻的扩展点。",
     icon: "observatory",
+  },
+  // ---- 生产经验营地（Act 0 支线） ----
+  {
+    id: "art_b1",
+    name: "生产装备图谱",
+    nameEn: "Production Gear Codex",
+    rarity: "uncommon",
+    sourceQuestId: "b1",
+    teaser: "旧行囊里的东西，比你记得的多。",
+    proves: "你系统盘点了 5 年 Unity 移动生产经验，把隐性能力整理成一张显性的、可公开引用的装备清单。",
+    careerValue: "转型者最常见的失误是把旧经验当包袱。这张图谱证明你把它当武器库——每次写简历、准备面试、写自我介绍，都从这里取材。",
+    skillsProven: ["经验盘点", "能力显性化", "非涉密表达"],
+    linkedinSuggestion: "可从清单中挑一条冷门但硬核的经验（如 SDK 集成的某类通用坑）写成短帖，测试技术叙事的水温。",
+    blogSuggestion: "以图谱为目录，规划一个『Unity 移动生产实录』系列，每条经验一篇短文。",
+    portfolioSuggestion: "作品集『技能』区直接引用图谱中最强的 5 条，按运行时/工具链/平台分组。",
+    resumeBullet: "5 年 Unity 移动生产经验：SDK 集成、平台构建链、生命周期差异处理、内存与性能专项优化。",
+    interviewExplanation: "我对自己的生产经验做过系统盘点，能快速定位任何话题下我真实做过的案例。",
+    icon: "codex2",
+  },
+  {
+    id: "art_b6",
+    name: "职业叙事卷轴",
+    nameEn: "Career Story Scroll",
+    rarity: "rare",
+    sourceQuestId: "b6",
+    teaser: "营火边写成的卷轴，将来会在面试桌上展开。",
+    proves: "你把生产经历提炼成了 2–3 个结构完整（STAR）、不涉密、有结果的面试故事，并各自提炼出简历要点。",
+    careerValue: "面试的一半是叙事。多数工程师直到面试前夜才仓促编故事——你的故事库是提前铸好的，且会随主线证据不断增补。",
+    skillsProven: ["STAR 叙事", "结果导向表达", "面试准备"],
+    linkedinSuggestion: "把最强的一个故事改写成第三人称短帖（隐去细节），作为『关于我』的置顶素材。",
+    blogSuggestion: "暂不需要博客。故事的舞台是面试与简历。",
+    portfolioSuggestion: "作品集『经历』区用故事的 S/R 两端做条目：一句背景 + 一句结果。",
+    resumeBullet: "（由你的 STAR 故事提炼——已在证据中生成，可直接取用。）",
+    interviewExplanation: "我准备了结构化的经历叙事：每个故事有情境、有职责、有行动、有可验证的结果。",
+    icon: "scroll2",
   },
 ];
 

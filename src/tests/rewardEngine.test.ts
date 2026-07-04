@@ -74,9 +74,17 @@ describe("rewardEngine · 神器与技能", () => {
     expect(artifacts[0].rarity).toBe("epic");
   });
 
-  it("Boss 之门不产神器，但存在奖励", () => {
-    expect(artifactsForQuest("boss_bridge")).toHaveLength(0);
+  it("初次信号之门铸成桥村之印（Epic）", () => {
+    const artifacts = artifactsForQuest("boss_bridge");
+    expect(artifacts).toHaveLength(1);
+    expect(artifacts[0].id).toBe("art_boss_bridge");
+    expect(artifacts[0].rarity).toBe("epic");
     expect(QUEST_BY_ID.boss_bridge.rewards.xp).toBeGreaterThan(0);
+  });
+
+  it("R0 铸成炉火誓约", () => {
+    const artifacts = artifactsForQuest("q_r0");
+    expect(artifacts.map((a) => a.id)).toEqual(["art_r0"]);
   });
 
   it("完成 M3 让 RAII 等技能证据就绪", () => {

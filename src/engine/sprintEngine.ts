@@ -1,6 +1,7 @@
 import { ARTIFACT_BY_ID } from "@/content/artifacts";
 import { QUEST_BY_ID } from "@/content/quests";
 import { getRecommendedQuest } from "@/engine/questEngine";
+import { cardsUnlockedBy } from "@/engine/reviewEngine";
 import { EMPTY_BUNDLE, mergeBundles, skillsMadeAvailableBy } from "@/engine/rewardEngine";
 import { uid } from "@/lib/ids";
 import type { RewardBundle, SessionRecap, SprintSession } from "@/types/domain";
@@ -51,6 +52,8 @@ export function buildRecap(
     ).map((s) => s.id),
   );
 
+  const reviewCardIds = session.questIds.flatMap((qid) => cardsUnlockedBy(qid).map((c) => c.id));
+
   return {
     id: uid("recap"),
     startedAt: session.startedAt,
@@ -58,6 +61,7 @@ export function buildRecap(
     questIds: session.questIds,
     artifactIds: session.artifactIds,
     skillIdsAvailable: [...new Set(skillIdsAvailable)],
+    reviewCardIds: [...new Set(reviewCardIds)],
     totals: session.totals,
     showcaseSuggestions,
     nextRisk: lastQuest?.nextRisk,

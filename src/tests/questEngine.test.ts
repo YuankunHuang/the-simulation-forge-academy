@@ -13,7 +13,7 @@ describe("questEngine · 今日推荐", () => {
     expect(getRecommendedQuest(["q_r0", "m0", "m1", "m2", "m3"])?.id).toBe("boss_bridge");
   });
 
-  it("可选任务（M13）只在主线清空后推荐", () => {
+  it("可选任务（M13 / 营地）只在主线清空后推荐", () => {
     const beforeM13 = [
       "q_r0", "m0", "m1", "m2", "m3", "boss_bridge",
       "m4", "m5", "m6", "m7", "m8", "boss_benchmark",
@@ -21,13 +21,22 @@ describe("questEngine · 今日推荐", () => {
       "m11", "boss_package", "m12", "boss_mobile",
     ];
     expect(getRecommendedQuest(beforeM13)?.id).toBe("m13");
-    expect(getRecommendedQuest([...beforeM13, "m13"])).toBeNull();
+    // M13 之后仍有营地支线可做
+    expect(getRecommendedQuest([...beforeM13, "m13"])?.id).toBe("b1");
+    // 营地也全部完成后才真正无事可做
+    const everything = [...beforeM13, "m13", "b1", "b2", "b3", "b4", "b5", "b6"];
+    expect(getRecommendedQuest(everything)).toBeNull();
+  });
+
+  it("营地支线永不劫持主线推荐", () => {
+    // R0 完成后营地 6 个任务全部可接，但推荐仍是主线 M0
+    expect(getRecommendedQuest(["q_r0"])?.id).toBe("m0");
   });
 });
 
 describe("questEngine · 完成资格", () => {
   it("证据不全时不可完成", () => {
-    const result = canCompleteQuest(QUEST_BY_ID.q_r0, [], { manifesto: "宣言宣言" });
+    const result = canCompleteQuest(QUEST_BY_ID.q_r0, [], { intention: "我要成为边界工程师" });
     expect(result.ok).toBe(false);
     expect(result.reasons.some((r) => r.includes("缺少证据"))).toBe(true);
   });
@@ -40,10 +49,10 @@ describe("questEngine · 完成资格", () => {
     expect(result.reasons.some((r) => r.includes("区域"))).toBe(true);
   });
 
-  it("状态可接且证据齐全时可完成", () => {
+  it("状态可接且证据齐全时可完成（可选反思不阻塞）", () => {
     const result = canCompleteQuest(QUEST_BY_ID.q_r0, [], {
-      manifesto: "现在的我 / 要成为的我 / 信条",
-      weekly_time: "每晚 1 小时",
+      intention: "我正在从 Unity 生产工程师转向确定性仿真基础设施工程师。",
+      main_project: "Unity Native Boundary Lab",
     });
     expect(result.ok).toBe(true);
   });
@@ -64,6 +73,9 @@ describe("sprintEngine · 深度冲刺", () => {
     expect(recap.nextQuestId).toBe("m1");
     expect(recap.nextRisk).toBe(QUEST_BY_ID.m0.nextRisk);
     expect(recap.showcaseSuggestions.length).toBeGreaterThan(0);
+    // R0 的两张卡随冲刺入组
+    expect(recap.reviewCardIds).toContain("card_r0_project");
+    expect(recap.reviewCardIds).toContain("card_r0_rule");
   });
 
   it("继续冒险指向下一个可接任务", () => {

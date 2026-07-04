@@ -5,13 +5,15 @@ import type { Quest, Region, RegionVisibility } from "@/types/domain";
 /**
  * unlockEngine — 可用性与战争迷雾。
  * 纯函数：输入已完成任务 id 集合，输出区域可见性 / 任务状态。
- * 规则：区域按线性门控解锁，不可跳过；当前解锁区域之后的第一个区域为“剪影预览”，更远的全部藏于迷雾。
+ * 规则：主线区域按线性门控解锁，不可跳过；当前解锁区域之后的第一个区域为“剪影预览”，
+ * 更远的全部藏于迷雾。支线区域（side，如生产经验营地）独立解锁，不参与线性迷雾链。
  */
 
 /** 区域解锁门：完成该任务后区域解锁。null = 初始解锁；undefined（不在表中）= 本 MVP 不可解锁（Act II/III）。 */
 const REGION_GATES: Record<string, string | null> = {
   hearth_hall: null,
   bridge_village: "q_r0",
+  production_basecamp: "q_r0",
   benchmark_plains: "boss_bridge",
   layout_archives: "boss_benchmark",
   safety_clinic: "boss_layout",
@@ -31,11 +33,16 @@ export function isRegionUnlocked(regionId: string, completedIds: readonly string
   return completedIds.includes(gate);
 }
 
-/** 全部区域的可见性（unlocked / preview / fogged），跨幕线性推导。 */
+/** 全部区域的可见性（unlocked / preview / fogged），跨幕线性推导；支线区域独立判定，不占用预览位。 */
 export function getRegionVisibility(completedIds: readonly string[]): Record<string, RegionVisibility> {
   const result: Record<string, RegionVisibility> = {};
   let previewAssigned = false;
   for (const region of ORDERED_REGIONS) {
+    if (region.side) {
+      // 支线区域：解锁即全开，未解锁保持剪影预览（永不深雾，玩家始终知道营地在那里）
+      result[region.id] = isRegionUnlocked(region.id, completedIds) ? "unlocked" : "preview";
+      continue;
+    }
     if (isRegionUnlocked(region.id, completedIds)) {
       result[region.id] = "unlocked";
     } else if (!previewAssigned) {

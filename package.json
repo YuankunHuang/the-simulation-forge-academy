@@ -1,7 +1,7 @@
 {
   "name": "the-simulation-forge-academy",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "仿真铸造学院 — A personal career RPG for becoming a deterministic realtime simulation engineer.",
   "scripts": {

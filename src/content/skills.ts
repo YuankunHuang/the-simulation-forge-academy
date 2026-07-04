@@ -20,7 +20,7 @@ export const SKILL_NODES: SkillNode[] = [
   { id: "skill_cmake", treeId: "tree_cpp", name: "CMake Basics", description: "用 CMake 描述并构建 native 工程。", sourceQuestIds: ["m1"], cost: 1, tier: 1 },
   { id: "skill_header_source", treeId: "tree_cpp", name: "Header/Source Organization", description: "头文件与实现分离的边界纪律。", sourceQuestIds: ["m1"], cost: 1, tier: 1 },
   { id: "skill_symbol_export", treeId: "tree_cpp", name: "Symbol Export", description: "导出宏与符号可见性控制。", sourceQuestIds: ["m1"], cost: 1, tier: 2 },
-  { id: "skill_extern_c", treeId: "tree_cpp", name: "extern \"C\"", description: "关闭 name mangling，暴露稳定 C 符号。", sourceQuestIds: ["m2"], cost: 1, tier: 2 },
+  { id: "skill_extern_c", treeId: "tree_cpp", name: "extern \"C\"", description: "关闭 name mangling，暴露稳定 C 符号。", sourceQuestIds: ["m1", "m2"], cost: 1, tier: 2 },
   { id: "skill_c_abi", treeId: "tree_cpp", name: "C ABI", description: "跨编译器/语言的二进制契约。", sourceQuestIds: ["m1", "m2"], cost: 1, tier: 2 },
   { id: "skill_opaque_handle", treeId: "tree_cpp", name: "Opaque Handle", description: "以不透明指针隐藏实现、稳定边界。", sourceQuestIds: ["m3"], cost: 1, tier: 3 },
   { id: "skill_raii", treeId: "tree_cpp", name: "RAII", description: "资源生命周期绑定作用域。", sourceQuestIds: ["m3"], cost: 1, tier: 3 },
@@ -31,6 +31,7 @@ export const SKILL_NODES: SkillNode[] = [
 
   // ---- B. Unity Interop ----
   { id: "skill_plugin_loading", treeId: "tree_interop", name: "Native Plugin Loading", description: "Unity 如何定位并加载原生插件。", sourceQuestIds: ["m2"], cost: 1, tier: 1 },
+  { id: "skill_mobile_production", treeId: "tree_interop", name: "Mobile Production Insights", description: "移动生产摩擦地图：SDK、构建链、平台差异。", sourceQuestIds: ["b3"], cost: 1, tier: 1 },
   { id: "skill_dllimport", treeId: "tree_interop", name: "DllImport", description: "P/Invoke 声明与封送基础。", sourceQuestIds: ["m2"], cost: 1, tier: 1 },
   { id: "skill_import_settings", treeId: "tree_interop", name: "Plugin Import Settings", description: "平台/架构级插件导入配置。", sourceQuestIds: ["m2", "m12"], cost: 1, tier: 2 },
   { id: "skill_intptr", treeId: "tree_interop", name: "IntPtr Boundary", description: "句柄在 managed 侧的安全持有。", sourceQuestIds: ["m3"], cost: 1, tier: 2 },
@@ -41,16 +42,18 @@ export const SKILL_NODES: SkillNode[] = [
   { id: "skill_upm", treeId: "tree_interop", name: "UPM Package", description: "可分发的 Unity 包工程。", sourceQuestIds: ["m11"], cost: 1, tier: 4 },
 
   // ---- C. C# Runtime / Performance ----
+  { id: "skill_unity_runtime_model", treeId: "tree_csharp", name: "Unity Runtime Mental Model", description: "生命周期、主线程、GC 与帧循环的显性模型。", sourceQuestIds: ["b2"], cost: 1, tier: 1 },
   { id: "skill_value_ref", treeId: "tree_csharp", name: "Value vs Reference", description: "值类型/引用类型的内存语义。", sourceQuestIds: ["m4"], cost: 1, tier: 1 },
   { id: "skill_blittable", treeId: "tree_csharp", name: "Blittable Types", description: "两侧位模式一致的可直传类型。", sourceQuestIds: ["m4"], cost: 1, tier: 1 },
   { id: "skill_structlayout", treeId: "tree_csharp", name: "StructLayout", description: "显式控制托管结构布局。", sourceQuestIds: ["m4"], cost: 1, tier: 2 },
-  { id: "skill_gc_alloc", treeId: "tree_csharp", name: "GC Allocation", description: "识别与测量托管堆分配。", sourceQuestIds: ["m7"], cost: 1, tier: 2 },
-  { id: "skill_hot_path", treeId: "tree_csharp", name: "Hot Path Rules", description: "热路径上的分配与调用纪律。", sourceQuestIds: ["m5"], cost: 1, tier: 3 },
+  { id: "skill_gc_alloc", treeId: "tree_csharp", name: "GC Allocation", description: "识别与测量托管堆分配。", sourceQuestIds: ["m7", "b4"], cost: 1, tier: 2 },
+  { id: "skill_hot_path", treeId: "tree_csharp", name: "Hot Path Rules", description: "热路径上的分配与调用纪律。", sourceQuestIds: ["m5", "b4"], cost: 1, tier: 3 },
   { id: "skill_benchmarking", treeId: "tree_csharp", name: "Benchmarking", description: "固定 seed、warmup、统计口径。", sourceQuestIds: ["m7"], cost: 1, tier: 3 },
   { id: "skill_burst", treeId: "tree_csharp", name: "Jobs/Burst Baseline", description: "Unity 高性能路径作为公平基线。", sourceQuestIds: ["m8"], cost: 1, tier: 4 },
   { id: "skill_unsafe_ptr", treeId: "tree_csharp", name: "Unsafe Pointer Contract", description: "受约束的指针路径与借用规则。", sourceQuestIds: ["m9"], cost: 1, tier: 4 },
 
   // ---- D. CS Systems Foundation ----
+  { id: "skill_repo_scaffold", treeId: "tree_foundation", name: "Repository Scaffold", description: "为严肃研究项目设计仓库结构。", sourceQuestIds: ["m0"], cost: 1, tier: 1 },
   { id: "skill_compilation", treeId: "tree_foundation", name: "Compilation", description: "从源码到目标文件。", sourceQuestIds: ["m1"], cost: 1, tier: 1 },
   { id: "skill_linking", treeId: "tree_foundation", name: "Linking", description: "符号解析与库链接。", sourceQuestIds: ["m1"], cost: 1, tier: 1 },
   { id: "skill_dynlib", treeId: "tree_foundation", name: "Dynamic Library", description: "动态库的加载与符号查找。", sourceQuestIds: ["m2"], cost: 1, tier: 2 },
@@ -61,7 +64,8 @@ export const SKILL_NODES: SkillNode[] = [
   { id: "skill_thread", treeId: "tree_foundation", name: "Thread Basics", description: "线程与并行执行基础。", sourceQuestIds: ["m8"], cost: 1, tier: 4 },
   { id: "skill_profiling", treeId: "tree_foundation", name: "Profiling", description: "用工具而非直觉定位成本。", sourceQuestIds: ["m7"], cost: 1, tier: 4 },
 
-  // ---- E. Deterministic Simulation（Act II 迷雾） ----
+  // ---- E. Deterministic Simulation（营地可提前解锁思想地基，其余 Act II 迷雾） ----
+  { id: "skill_sim_split", treeId: "tree_determinism", name: "Gameplay/Simulation Split", description: "仿真核心与呈现层分离的架构论证。", sourceQuestIds: ["b5"], cost: 1, tier: 1 },
   { id: "skill_fixed_timestep", treeId: "tree_determinism", name: "Fixed Timestep", description: "固定节拍是确定性的前提。", sourceQuestIds: [], cost: 1, tier: 1 },
   { id: "skill_input_log", treeId: "tree_determinism", name: "Input Log", description: "把所有输入写成可回放的日志。", sourceQuestIds: [], cost: 1, tier: 1 },
   { id: "skill_state_hash", treeId: "tree_determinism", name: "State Hash", description: "为每帧状态生成指纹。", sourceQuestIds: [], cost: 1, tier: 2 },
@@ -72,6 +76,11 @@ export const SKILL_NODES: SkillNode[] = [
   { id: "skill_validation_harness", treeId: "tree_determinism", name: "Validation Harness", description: "自动验证确定性的测试装置。", sourceQuestIds: [], cost: 1, tier: 4 },
 
   // ---- F. Interview / Communication ----
+  { id: "skill_evidence_progression", treeId: "tree_interview", name: "Evidence-based Progression", description: "无证据，无精通：以产物驱动学习。", sourceQuestIds: ["q_r0"], cost: 1, tier: 1 },
+  { id: "skill_career_north_star", treeId: "tree_interview", name: "Career North Star", description: "明确的身份转型路径与一句话意图。", sourceQuestIds: ["q_r0"], cost: 1, tier: 1 },
+  { id: "skill_project_scoping", treeId: "tree_interview", name: "Project Scoping", description: "把野心装进清晰边界的立项能力。", sourceQuestIds: ["m0"], cost: 1, tier: 1 },
+  { id: "skill_tech_thesis", treeId: "tree_interview", name: "Technical Thesis", description: "一段话讲清项目的研究命题。", sourceQuestIds: ["m0"], cost: 1, tier: 1 },
+  { id: "skill_career_story", treeId: "tree_interview", name: "Career Story (STAR)", description: "结构化、有结果的经历叙事。", sourceQuestIds: ["b6"], cost: 1, tier: 2 },
   { id: "skill_arch_explain", treeId: "tree_interview", name: "Architecture Explanation", description: "把架构讲成清晰的故事。", sourceQuestIds: ["m3"], cost: 1, tier: 1 },
   { id: "skill_tradeoff", treeId: "tree_interview", name: "Trade-off Explanation", description: "用正反证据表达取舍。", sourceQuestIds: ["m6"], cost: 1, tier: 1 },
   { id: "skill_bench_method", treeId: "tree_interview", name: "Benchmark Methodology", description: "为你的数字辩护。", sourceQuestIds: ["m7"], cost: 1, tier: 2 },

@@ -20,6 +20,14 @@ describe("unlockEngine · 区域迷雾", () => {
     expect(vis.portfolio_hall).toBe("fogged");
   });
 
+  it("营地支线不占用主线预览位：未解锁时保持剪影，不影响主线迷雾推导", () => {
+    const before = getRegionVisibility([]);
+    expect(before.production_basecamp).toBe("preview");
+    expect(before.bridge_village).toBe("preview"); // 主线预览位仍归新手村
+    const after = getRegionVisibility(["q_r0"]);
+    expect(after.production_basecamp).toBe("unlocked");
+  });
+
   it("完成 R0 后：新手村解锁，平原变为预览", () => {
     const vis = getRegionVisibility(["q_r0"]);
     expect(vis.bridge_village).toBe("unlocked");

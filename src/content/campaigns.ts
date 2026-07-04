@@ -1,8 +1,9 @@
 import type { Campaign, Region } from "@/types/domain";
 
 /**
- * 世界结构：三幕战役 + 各自的区域。
+ * 世界结构：主线三幕 + 可选的生产经验营地（Act 0 支线）。
  * Act II / III 在 MVP 中仅作为迷雾中的剪影存在（无任务内容）。
+ * 营地是支线：不参与线性迷雾链，点燃炉火后即开放，永不阻塞主线。
  */
 
 export const CAMPAIGNS: Campaign[] = [
@@ -24,8 +25,16 @@ export const CAMPAIGNS: Campaign[] = [
     ],
   },
   {
-    id: "act2",
+    id: "act0",
     order: 2,
+    name: "营地 · 整理旧装备",
+    nameEn: "BASECAMP: Production Experience",
+    tagline: "把五年 Unity 生产直觉变成有名字的证据。可选支线，永不阻塞主线。",
+    regionIds: ["production_basecamp"],
+  },
+  {
+    id: "act2",
+    order: 3,
     name: "第二幕 · 内核铸造者",
     nameEn: "ACT II: The Kernel Builder",
     tagline: "在 Unity 之外，铸造一个可复现的确定性仿真内核。",
@@ -41,7 +50,7 @@ export const CAMPAIGNS: Campaign[] = [
   },
   {
     id: "act3",
-    order: 3,
+    order: 4,
     name: "第三幕 · 确定性架构师",
     nameEn: "ACT III: The Determinism Architect",
     tagline: "从内核到基础设施，从证据到职业身份。",
@@ -142,6 +151,18 @@ export const REGIONS: Region[] = [
     vibe: "塔顶的望远镜指向引擎更深处的星空。",
     description: "可选的晚期扩展：XR 位姿诊断或 render-thread 事件示例。",
     icon: "observatory",
+  },
+  // ---- BASECAMP（Act 0 支线：整理旧装备） ----
+  {
+    id: "production_basecamp",
+    actId: "act0",
+    order: 0,
+    name: "生产经验营地",
+    nameEn: "Production Basecamp",
+    vibe: "帐篷里摊开五年的旧装备——每一件都比你以为的更值钱。",
+    description: "把 Unity 移动生产的隐性经验整理成显性证据：盘点、心智模型、热路径规则、职业叙事。可选，不阻塞主线。",
+    icon: "camp",
+    side: true,
   },
   // ---- ACT II（迷雾中的剪影） ----
   {
