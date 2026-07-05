@@ -2,9 +2,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
+import { GateScreen } from "@/features/gate/GateScreen";
 import { RewardCeremony } from "@/features/rewards/RewardCeremony";
 import { pageVariants } from "@/lib/motion";
-import { useCloudAutoSync } from "@/store/cloudSyncStore";
+import { useCloudAutoSync, useCloudSyncStore } from "@/store/cloudSyncStore";
 import { APP_ROUTES } from "./routes";
 import { Providers } from "./providers";
 
@@ -35,16 +36,22 @@ function AnimatedRoutes() {
 
 export default function App() {
   useCloudAutoSync();
+  // 个人门户：没有口令时全屏拦截（口令即云端存档钥匙，验证过一次就持久化在本机）
+  const unlocked = useCloudSyncStore((s) => s.passphrase !== null);
   return (
     <Providers>
-      {/* HashRouter：GitHub Pages 等静态托管无需服务端路由配置 */}
-      <HashRouter>
-        <ScrollToTop />
-        <AppShell>
-          <AnimatedRoutes />
-        </AppShell>
-        <RewardCeremony />
-      </HashRouter>
+      {!unlocked ? (
+        <GateScreen />
+      ) : (
+        // HashRouter：GitHub Pages 等静态托管无需服务端路由配置
+        <HashRouter>
+          <ScrollToTop />
+          <AppShell>
+            <AnimatedRoutes />
+          </AppShell>
+          <RewardCeremony />
+        </HashRouter>
+      )}
     </Providers>
   );
 }

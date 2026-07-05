@@ -9,37 +9,22 @@ import { useCloudSyncStore } from "@/store/cloudSyncStore";
 
 /**
  * 云端存档面板 — 接入现有存档页签。
- * 未连接：填一次口令；已连接：状态一览 + 手动兜底按钮 + 拉取前的覆盖确认。
+ * 口令的输入与验证由入口门户（GateScreen）负责，这里只展示同步状态与手动兜底操作。
  */
 export function CloudSyncPanel() {
   const passphrase = useCloudSyncStore((s) => s.passphrase);
   const autoSyncEnabled = useCloudSyncStore((s) => s.autoSyncEnabled);
   const lastSyncedAt = useCloudSyncStore((s) => s.lastSyncedAt);
   const status = useCloudSyncStore((s) => s.status);
-  const connect = useCloudSyncStore((s) => s.connect);
   const disconnect = useCloudSyncStore((s) => s.disconnect);
   const setAutoSync = useCloudSyncStore((s) => s.setAutoSync);
   const pushNow = useCloudSyncStore((s) => s.pushNow);
   const pullNow = useCloudSyncStore((s) => s.pullNow);
   const peekRemote = useCloudSyncStore((s) => s.peekRemote);
 
-  const [input, setInput] = useState("");
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [pullConfirm, setPullConfirm] = useState<{ summary: RemoteSummary | null } | null>(null);
   const [busy, setBusy] = useState(false);
-
-  const handleConnect = async () => {
-    if (!input.trim()) return;
-    setBusy(true);
-    const result = await connect(input.trim());
-    setBusy(false);
-    if (result.ok) {
-      setInput("");
-      setMessage({ tone: "ok", text: "已连接云端存档。" });
-    } else {
-      setMessage({ tone: "error", text: result.error ?? "连接失败。" });
-    }
-  };
 
   const handlePushNow = async () => {
     setBusy(true);
@@ -83,28 +68,11 @@ export function CloudSyncPanel() {
           云端存档同步
         </h2>
         <p className="text-xs text-ink-soft">
-          {passphrase
-            ? "跨设备共享进度：本机改动会自动同步到云端，其它设备也能拉取到最新进度。"
-            : "填一次口令即可在多台设备之间共享同一份进度，完全免费、不涉及账号系统。"}
+          跨设备共享进度：本机改动会自动同步到云端，其它设备打开时也会自动加载最新进度。
         </p>
       </div>
 
-      {!passphrase ? (
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="password"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && void handleConnect()}
-            placeholder="输入同步口令"
-            className="flex-1 rounded-xl border border-wood-light/40 bg-white/70 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint/70 focus:border-ember"
-          />
-          <Button disabled={busy || !input.trim()} onClick={handleConnect}>
-            <Icon name="check" size={16} />
-            连接
-          </Button>
-        </div>
-      ) : (
+      {passphrase && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-cream-200/60 px-4 py-2.5">
             <span className="flex items-center gap-1.5 text-xs text-ink-soft">
@@ -133,7 +101,7 @@ export function CloudSyncPanel() {
             </Button>
           </div>
           <button type="button" onClick={disconnect} className="text-xs text-ink-faint hover:text-ink transition-colors">
-            断开云端连接（口令只会从本机清除，云端存档保留）
+            退出并锁上大门（口令只会从本机清除，云端存档保留）
           </button>
         </>
       )}

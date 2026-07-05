@@ -43,45 +43,24 @@ npm test           # 运行全部引擎单元测试（Vitest）
 npm run test:watch # 测试监听模式
 ```
 
-## 部署到 GitHub Pages
+## 部署（Cloudflare Workers）
 
-构建产物是纯静态文件（`base: "./"` + HashRouter，无需服务端配置）：
+线上部署走 Cloudflare Workers（含静态资源）：`wrangler.toml` 声明 Worker 入口 `worker/index.ts` 与静态目录 `dist/`，KV 命名空间 `SFA_KV` 存放云端存档，Secret `SYNC_PASSPHRASE` 为同步口令。推送到 Git 后由 Cloudflare Workers Builds 自动构建部署。
 
 ```bash
-npm run build
+npm run worker:dev   # 本地联调 Worker（先 build，再 wrangler dev）
 ```
 
-方式一（手动）：把 `dist/` 内容推到仓库的 `gh-pages` 分支，在 GitHub 仓库设置里启用 Pages。
+本地联调前把 `.dev.vars.example` 复制为 `.dev.vars` 并填入口令。
 
-方式二（GitHub Actions）：在 `.github/workflows/deploy.yml` 使用官方 Pages 工作流，构建后上传 `dist/`：
-
-```yaml
-name: Deploy
-on: { push: { branches: [main] } }
-permissions: { contents: read, pages: write, id-token: write }
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci && npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
-      - id: deployment
-        uses: actions/deploy-pages@v4
-```
-
-部署到任何静态托管（Netlify / Vercel / 自建 nginx）同理：直接托管 `dist/`。
+前端构建产物本身仍是纯静态文件（`base: "./"` + HashRouter），也可以托管到 GitHub Pages / Netlify 等任何静态托管——只是没有 `/api/save` 时云端同步不可用，应用退化为纯本地存档。
 
 ## 数据与隐私
 
-- 所有进度只保存在浏览器 `localStorage`（键：`sfa-save-v1`）。
-- 无后端、无账号、无云同步、无分析埋点、无外部 AI API。
-- 在「篝火日志 → 存档」中可导出/导入 JSON 备份；换浏览器或设备时用它迁移。
+- 进度以浏览器 `localStorage` 为主存（键：`sfa-save-v1`），并自动同步到你自己的 Cloudflare KV（单一存档，共享口令鉴权，无账号系统）。
+- 应用入口有一道口令门：口令即云端存档的钥匙，验证一次后持久化在本机；启动时自动对账，云端更新则拉取、本地更新则推送，任何设备打开都是最新进度。
+- 无分析埋点、无外部 AI API。
+- 在「篝火日志 → 存档」中可导出/导入 JSON 备份，也可手动推送/拉取云端存档。
 
 ## 如何编辑内容
 

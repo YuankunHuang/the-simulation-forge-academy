@@ -11,7 +11,18 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // jsdom 没有 canvas，mock 掉彩带
 vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
 
-beforeAll(() => {
+beforeAll(async () => {
+  // App 入口有口令门：预先注入口令并 mock 掉云同步网络请求，直接进入主界面
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_url: string, init?: RequestInit) =>
+      (init?.method === "PUT"
+        ? { ok: true, status: 200, json: async () => ({ savedAt: new Date().toISOString() }) }
+        : { ok: false, status: 404, json: async () => ({ error: "云端还没有存档。" }) }) as unknown as Response,
+    ),
+  );
+  const { useCloudSyncStore } = await import("@/store/cloudSyncStore");
+  useCloudSyncStore.setState({ passphrase: "test-pass" });
   // jsdom 缺失的浏览器 API
   window.matchMedia ??= ((query: string) => ({
     matches: false,

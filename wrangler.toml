@@ -7,6 +7,11 @@ compatibility_date = "2026-07-04"
 # 避免受控制台 UI 偶发问题（比如开关点击没反应）影响。
 workers_dev = true
 
+# 域名 yuankunhuang.com 迁到 Cloudflare 之后取消下面注释，重新部署即自动绑定自定义域
+# [[routes]]
+# pattern = "sfa.yuankunhuang.com"
+# custom_domain = true
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"
