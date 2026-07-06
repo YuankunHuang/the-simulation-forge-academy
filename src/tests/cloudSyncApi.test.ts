@@ -50,7 +50,7 @@ describe("fetchRemoteSave", () => {
 });
 
 describe("pushRemoteSave", () => {
-  it("PUT 请求带 content-type 与 body（鉴权由同源 cookie 自动携带）", async () => {
+  it("PUT 请求带 content-type、body 与 keepalive（鉴权由同源 cookie 自动携带）", async () => {
     const fetchMock = mockFetchOnce({ ok: true, status: 200, json: async () => ({ savedAt: "2026-07-04T10:00:00.000Z" }) });
     const result = await pushRemoteSave('{"foo":"bar"}');
     expect(fetchMock).toHaveBeenCalledWith(
@@ -59,6 +59,8 @@ describe("pushRemoteSave", () => {
         method: "PUT",
         headers: { "content-type": "application/json; charset=utf-8" },
         body: '{"foo":"bar"}',
+        // 页面卸载时补推依赖 keepalive 才能跑完，这里确认它始终被带上
+        keepalive: true,
       }),
     );
     expect(result.savedAt).toBe("2026-07-04T10:00:00.000Z");

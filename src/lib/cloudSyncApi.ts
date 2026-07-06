@@ -52,7 +52,12 @@ export interface PushResult {
   savedAt: string;
 }
 
-/** 推送本机存档到云端，覆盖远程当前内容。 */
+/**
+ * 推送本机存档到云端，覆盖远程当前内容。
+ * keepalive: true —— 关键：离开页面前的补推（beforeunload/visibilitychange）发生在页面卸载过程中，
+ * 普通 fetch 请求不保证能在页面真正关闭前跑完，可能被浏览器提前掐断；keepalive 让它在页面卸载后
+ * 仍以后台请求形式继续送达（Chrome 对 keepalive 请求体有约 64KB 的限制，存档一般远小于此）。
+ */
 export async function pushRemoteSave(json: string): Promise<PushResult> {
   let res: Response;
   try {
@@ -60,6 +65,7 @@ export async function pushRemoteSave(json: string): Promise<PushResult> {
       method: "PUT",
       headers: { "content-type": "application/json; charset=utf-8" },
       body: json,
+      keepalive: true,
     });
   } catch {
     throw new CloudSyncError("network", "连接云端失败，请检查网络。");
