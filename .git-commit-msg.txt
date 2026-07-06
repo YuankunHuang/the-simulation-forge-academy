@@ -1,6 +1,0 @@
-harden cloud save push with fetch keepalive
-
-Page-unload-triggered flush (beforeunload/visibilitychange) fires an
-async fetch that browsers don't guarantee to finish once the tab is
-closing; keepalive lets the last save reach the KV store instead of
-being silently dropped.
