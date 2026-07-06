@@ -51,7 +51,6 @@ function stubSaveApi(options: { getStatus: 200 | 404; json?: string; savedAt?: s
 beforeEach(() => {
   usePlayerStore.setState({ ...createInitialPlayerState(), ceremony: null });
   useCloudSyncStore.setState({
-    passphrase: "test-pass",
     autoSyncEnabled: true,
     lastSyncedAt: null,
     lastLocalChangeAt: null,

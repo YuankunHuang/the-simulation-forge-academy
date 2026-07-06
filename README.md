@@ -45,20 +45,23 @@ npm run test:watch # 测试监听模式
 
 ## 部署（Cloudflare Workers）
 
-线上部署走 Cloudflare Workers（含静态资源）：`wrangler.toml` 声明 Worker 入口 `worker/index.ts` 与静态目录 `dist/`，KV 命名空间 `SFA_KV` 存放云端存档，Secret `SYNC_PASSPHRASE` 为同步口令。推送到 Git 后由 Cloudflare Workers Builds 自动构建部署。
+线上部署走 Cloudflare Workers（含静态资源）：`wrangler.toml` 声明 Worker 入口 `worker/index.ts` 与静态目录 `dist/`，KV 命名空间 `SFA_KV` 存放云端存档，Secret `PORTAL_SESSION_SECRET` 用于校验统一门禁 cookie（见下）。推送到 Git 后由 Cloudflare Workers Builds 自动构建部署。
+
+本项目的访问控制不是自己做的，而是接入了姊妹项目 treasure-box（百宝箱）的统一门禁：`worker/index.ts` 在放行任何请求前，都会校验请求里的 `box_session` cookie（`worker/portalAuth.ts`）；没有它，静态资源和 `/api/save` 一律拒绝——页面请求 302 跳去百宝箱补验证，`/api/save` 直接 401。`PORTAL_SESSION_SECRET` 的值必须和百宝箱的 `BOX_PASSPHRASE` 完全一致，两边独立部署、独立设置：
 
 ```bash
-npm run worker:dev   # 本地联调 Worker（先 build，再 wrangler dev）
+npx wrangler secret put PORTAL_SESSION_SECRET   # 值需与百宝箱的 BOX_PASSPHRASE 相同
+npm run worker:dev                              # 本地联调 Worker（先 build，再 wrangler dev）
 ```
 
-本地联调前把 `.dev.vars.example` 复制为 `.dev.vars` 并填入口令。
+本地联调前把 `.dev.vars.example` 复制为 `.dev.vars` 并填入同一份口令。
 
-前端构建产物本身仍是纯静态文件（`base: "./"` + HashRouter），也可以托管到 GitHub Pages / Netlify 等任何静态托管——只是没有 `/api/save` 时云端同步不可用，应用退化为纯本地存档。
+前端构建产物本身仍是纯静态文件（`base: "./"` + HashRouter），理论上也可以脱离 Worker 单独托管到 GitHub Pages / Netlify——但会失去统一门禁与 `/api/save`，云端同步不可用，应用退化为纯本地存档。
 
 ## 数据与隐私
 
-- 进度以浏览器 `localStorage` 为主存（键：`sfa-save-v1`），并自动同步到你自己的 Cloudflare KV（单一存档，共享口令鉴权，无账号系统）。
-- 应用入口有一道口令门：口令即云端存档的钥匙，验证一次后持久化在本机；启动时自动对账，云端更新则拉取、本地更新则推送，任何设备打开都是最新进度。
+- 进度以浏览器 `localStorage` 为主存（键：`sfa-save-v1`），并自动同步到你自己的 Cloudflare KV（单一存档，无账号系统）。
+- 访问控制由百宝箱统一门禁在服务端强制执行（见上），本应用自己不再维护任何口令状态；启动时自动对账，云端更新则拉取、本地更新则推送，任何设备打开都是最新进度。
 - 无分析埋点、无外部 AI API。
 - 在「篝火日志 → 存档」中可导出/导入 JSON 备份，也可手动推送/拉取云端存档。
 

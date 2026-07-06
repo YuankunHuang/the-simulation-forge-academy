@@ -9,14 +9,13 @@ import { useCloudSyncStore } from "@/store/cloudSyncStore";
 
 /**
  * 云端存档面板 — 接入现有存档页签。
- * 口令的输入与验证由入口门户（GateScreen）负责，这里只展示同步状态与手动兜底操作。
+ * 身份校验已经上移到百宝箱统一门禁（Worker 层），这里只展示同步状态与手动兜底操作。
+ * 要登出，去百宝箱页面点「合上箱盖」——作用于整个 yuankunhuang.com 域，不是这里能控制的。
  */
 export function CloudSyncPanel() {
-  const passphrase = useCloudSyncStore((s) => s.passphrase);
   const autoSyncEnabled = useCloudSyncStore((s) => s.autoSyncEnabled);
   const lastSyncedAt = useCloudSyncStore((s) => s.lastSyncedAt);
   const status = useCloudSyncStore((s) => s.status);
-  const disconnect = useCloudSyncStore((s) => s.disconnect);
   const setAutoSync = useCloudSyncStore((s) => s.setAutoSync);
   const pushNow = useCloudSyncStore((s) => s.pushNow);
   const pullNow = useCloudSyncStore((s) => s.pullNow);
@@ -72,39 +71,32 @@ export function CloudSyncPanel() {
         </p>
       </div>
 
-      {passphrase && (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-cream-200/60 px-4 py-2.5">
-            <span className="flex items-center gap-1.5 text-xs text-ink-soft">
-              <Icon name={status === "error" ? "warning" : "check"} size={13} className={status === "error" ? "text-ember-deep" : "text-moss-deep"} />
-              {lastSyncedAt ? `上次同步：${formatIsoZh(lastSyncedAt)}` : "还未同步过"}
-            </span>
-            <button
-              type="button"
-              onClick={() => setAutoSync(!autoSyncEnabled)}
-              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
-                autoSyncEnabled ? "bg-moss/15 text-moss-deep" : "bg-wood/10 text-ink-faint"
-              }`}
-            >
-              自动同步：{autoSyncEnabled ? "已开启" : "已关闭"}
-            </button>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-cream-200/60 px-4 py-2.5">
+        <span className="flex items-center gap-1.5 text-xs text-ink-soft">
+          <Icon name={status === "error" ? "warning" : "check"} size={13} className={status === "error" ? "text-ember-deep" : "text-moss-deep"} />
+          {lastSyncedAt ? `上次同步：${formatIsoZh(lastSyncedAt)}` : "还未同步过"}
+        </span>
+        <button
+          type="button"
+          onClick={() => setAutoSync(!autoSyncEnabled)}
+          className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+            autoSyncEnabled ? "bg-moss/15 text-moss-deep" : "bg-wood/10 text-ink-faint"
+          }`}
+        >
+          自动同步：{autoSyncEnabled ? "已开启" : "已关闭"}
+        </button>
+      </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="secondary" className="flex-1" disabled={busy} onClick={handlePushNow}>
-              <Icon name="upload" size={16} />
-              立即同步到云端
-            </Button>
-            <Button variant="secondary" className="flex-1" disabled={busy} onClick={handleOpenPullConfirm}>
-              <Icon name="download" size={16} />
-              从云端拉取到本机
-            </Button>
-          </div>
-          <button type="button" onClick={disconnect} className="text-xs text-ink-faint hover:text-ink transition-colors">
-            退出并锁上大门（口令只会从本机清除，云端存档保留）
-          </button>
-        </>
-      )}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button variant="secondary" className="flex-1" disabled={busy} onClick={handlePushNow}>
+          <Icon name="upload" size={16} />
+          立即同步到云端
+        </Button>
+        <Button variant="secondary" className="flex-1" disabled={busy} onClick={handleOpenPullConfirm}>
+          <Icon name="download" size={16} />
+          从云端拉取到本机
+        </Button>
+      </div>
 
       {message && (
         <p

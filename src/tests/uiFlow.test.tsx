@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("canvas-confetti", () => ({ default: vi.fn() }));
 
 beforeAll(async () => {
-  // App 入口有口令门：预先注入口令并 mock 掉云同步网络请求，直接进入主界面
+  // 门禁已上移到 Worker 层，App 组件不再关心口令；这里只需 mock 掉云同步网络请求
   vi.stubGlobal(
     "fetch",
     vi.fn(async (_url: string, init?: RequestInit) =>
@@ -21,8 +21,6 @@ beforeAll(async () => {
         : { ok: false, status: 404, json: async () => ({ error: "云端还没有存档。" }) }) as unknown as Response,
     ),
   );
-  const { useCloudSyncStore } = await import("@/store/cloudSyncStore");
-  useCloudSyncStore.setState({ passphrase: "test-pass" });
   // jsdom 缺失的浏览器 API
   window.matchMedia ??= ((query: string) => ({
     matches: false,

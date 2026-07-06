@@ -7,20 +7,27 @@ compatibility_date = "2026-07-04"
 # 避免受控制台 UI 偶发问题（比如开关点击没反应）影响。
 workers_dev = true
 
-# 域名 yuankunhuang.com 迁到 Cloudflare 之后取消下面注释，重新部署即自动绑定自定义域
-# [[routes]]
-# pattern = "sfa.yuankunhuang.com"
-# custom_domain = true
+[[routes]]
+pattern = "sfa.yuankunhuang.com"
+custom_domain = true
 
+# run_worker_first = true 是关键：Cloudflare 静态资源默认「命中文件就直接吐出去，跳过 Worker」，
+# 这会绕过下面 worker/index.ts 里的统一门禁检查（静态壳子对任何人可见，即便存档数据本身仍受
+# /api/save 的鉴权保护）。加上这一行强制每个请求都先过 Worker 的 fetch()，鉴权通过后
+# Worker 再自己调用 env.ASSETS.fetch(request) 转发静态资源。
 [assets]
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
+run_worker_first = true
 
 [[kv_namespaces]]
 binding = "SFA_KV"
 id = "3fe03142a0af4f53b1111b6701890e5c"
 
-# SYNC_PASSPHRASE 是 secret，不写在这里——部署后去 Worker 的
-# Settings → Variables and Secrets 里加密添加，然后重新触发一次部署即可生效。
-# 本地开发时，`wrangler dev` 会读取项目根目录的 .dev.vars 文件（已在 .gitignore 里）。
+# PORTAL_SESSION_SECRET 是 secret，不写在这里——值必须和 treasure-box（百宝箱）的
+# BOX_PASSPHRASE 完全一致，这样百宝箱签发的 cookie 才能在这里通过验证（统一门禁）。
+# 部署后去 Worker 的 Settings → Variables and Secrets 里加密添加，或本地运行：
+#   npx wrangler secret put PORTAL_SESSION_SECRET
+# 然后重新触发一次部署即可生效。本地开发时，`wrangler dev` 会读取项目根目录的
+# .dev.vars 文件（已在 .gitignore 里）。

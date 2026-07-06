@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { todayStr } from "@/lib/date";
 import { usePlayerStore } from "@/store/playerStore";
-import { useCloudSyncStore } from "@/store/cloudSyncStore";
 import { CloudSyncPanel } from "./CloudSyncPanel";
 
 /** 存档面板 — 导出/导入 JSON、云端同步与重置。 */
@@ -12,7 +11,6 @@ export function SaveDataPanel({ completedCount }: { completedCount: number }) {
   const exportSave = usePlayerStore((s) => s.exportSave);
   const importSave = usePlayerStore((s) => s.importSave);
   const resetAll = usePlayerStore((s) => s.resetAll);
-  const cloudConnected = useCloudSyncStore((s) => !!s.passphrase);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
@@ -58,9 +56,7 @@ export function SaveDataPanel({ completedCount }: { completedCount: number }) {
         <div>
           <h2 className="text-sm font-bold text-ink mb-1">存档管理</h2>
           <p className="text-xs text-ink-soft">
-            {cloudConnected
-              ? "本地数据保存在浏览器（localStorage）里，同时已连接云端同步（见上）。"
-              : "所有数据只保存在你自己的浏览器（localStorage）里，没有云端、没有账号。"}
+            本地数据保存在浏览器（localStorage）里，同时已连接云端同步（见上）。
             当前进度：已完成 {completedCount} 个任务。建议定期导出 JSON 备份。
           </p>
         </div>

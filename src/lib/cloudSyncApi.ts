@@ -1,6 +1,7 @@
 /**
- * 云端存档 API 客户端 — 对接 Cloudflare Pages Function `/api/save`。
- * 与游戏同源部署，没有跨域问题；鉴权只是一个共享口令（个人工具级别）。
+ * 云端存档 API 客户端 — 对接 Cloudflare Worker 的 `/api/save`。
+ * 与游戏同源部署，没有跨域问题；鉴权由浏览器自动携带的百宝箱统一门禁 cookie 完成
+ * （worker/index.ts 在转发到这里之前已经校验过，未授权请求根本到不了这一层）。
  */
 
 export type CloudSyncErrorKind = "unauthorized" | "not_found" | "invalid" | "network";
@@ -15,7 +16,7 @@ export class CloudSyncError extends Error {
 }
 
 async function errorFromResponse(res: Response): Promise<CloudSyncError> {
-  if (res.status === 401) return new CloudSyncError("unauthorized", "口令不正确。");
+  if (res.status === 401) return new CloudSyncError("unauthorized", "未通过百宝箱验证。");
   if (res.status === 404) return new CloudSyncError("not_found", "云端还没有存档。");
   let detail = "";
   try {
@@ -34,14 +35,11 @@ export interface RemoteSave {
   savedAt: string | null;
 }
 
-/** 拉取云端存档；不存在抛 CloudSyncError("not_found")，口令错抛 "unauthorized"。 */
-export async function fetchRemoteSave(passphrase: string): Promise<RemoteSave> {
+/** 拉取云端存档；不存在抛 CloudSyncError("not_found")，未授权抛 "unauthorized"。 */
+export async function fetchRemoteSave(): Promise<RemoteSave> {
   let res: Response;
   try {
-    res = await fetch("/api/save", {
-      method: "GET",
-      headers: { "X-Sync-Passphrase": passphrase },
-    });
+    res = await fetch("/api/save", { method: "GET" });
   } catch {
     throw new CloudSyncError("network", "连接云端失败，请检查网络。");
   }
@@ -55,12 +53,12 @@ export interface PushResult {
 }
 
 /** 推送本机存档到云端，覆盖远程当前内容。 */
-export async function pushRemoteSave(passphrase: string, json: string): Promise<PushResult> {
+export async function pushRemoteSave(json: string): Promise<PushResult> {
   let res: Response;
   try {
     res = await fetch("/api/save", {
       method: "PUT",
-      headers: { "X-Sync-Passphrase": passphrase, "content-type": "application/json; charset=utf-8" },
+      headers: { "content-type": "application/json; charset=utf-8" },
       body: json,
     });
   } catch {
@@ -68,15 +66,4 @@ export async function pushRemoteSave(passphrase: string, json: string): Promise<
   }
   if (!res.ok) throw await errorFromResponse(res);
   return (await res.json()) as PushResult;
-}
-
-/** 用一次只读请求验证口令是否正确（不存在存档也算验证通过）。 */
-export async function testPassphrase(passphrase: string): Promise<boolean> {
-  try {
-    await fetchRemoteSave(passphrase);
-    return true;
-  } catch (err) {
-    if (err instanceof CloudSyncError && err.kind === "not_found") return true;
-    return false;
-  }
 }

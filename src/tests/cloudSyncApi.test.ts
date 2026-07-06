@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CloudSyncError, fetchRemoteSave, pushRemoteSave, testPassphrase } from "@/lib/cloudSyncApi";
+import { CloudSyncError, fetchRemoteSave, pushRemoteSave } from "@/lib/cloudSyncApi";
 import { summarizeSaveJson } from "@/lib/saveSummary";
 
 /** cloudSyncApi 与 summarizeSaveJson 的纯逻辑单测——全部 mock fetch，不发真实网络请求。 */
@@ -24,23 +24,20 @@ describe("fetchRemoteSave", () => {
       headers: { get: (k: string) => headers.get(k) ?? null } as unknown as Headers,
     });
 
-    const result = await fetchRemoteSave("secret");
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/save",
-      expect.objectContaining({ method: "GET", headers: { "X-Sync-Passphrase": "secret" } }),
-    );
+    const result = await fetchRemoteSave();
+    expect(fetchMock).toHaveBeenCalledWith("/api/save", expect.objectContaining({ method: "GET" }));
     expect(result.json).toBe('{"app":"the-simulation-forge-academy"}');
     expect(result.savedAt).toBe("2026-07-04T10:00:00.000Z");
   });
 
-  it("401 抛 unauthorized", async () => {
-    mockFetchOnce({ ok: false, status: 401, json: async () => ({ error: "口令不正确。" }) });
-    await expect(fetchRemoteSave("wrong")).rejects.toMatchObject({ kind: "unauthorized" });
+  it("401 抛 unauthorized（未通过百宝箱统一门禁）", async () => {
+    mockFetchOnce({ ok: false, status: 401, json: async () => ({ error: "未通过百宝箱验证。" }) });
+    await expect(fetchRemoteSave()).rejects.toMatchObject({ kind: "unauthorized" });
   });
 
   it("404 抛 not_found", async () => {
     mockFetchOnce({ ok: false, status: 404, json: async () => ({ error: "云端还没有存档。" }) });
-    await expect(fetchRemoteSave("secret")).rejects.toMatchObject({ kind: "not_found" });
+    await expect(fetchRemoteSave()).rejects.toMatchObject({ kind: "not_found" });
   });
 
   it("网络异常抛 network", async () => {
@@ -48,40 +45,23 @@ describe("fetchRemoteSave", () => {
       "fetch",
       vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
     );
-    await expect(fetchRemoteSave("secret")).rejects.toMatchObject({ kind: "network" });
+    await expect(fetchRemoteSave()).rejects.toMatchObject({ kind: "network" });
   });
 });
 
 describe("pushRemoteSave", () => {
-  it("PUT 请求带口令头、content-type 与 body", async () => {
+  it("PUT 请求带 content-type 与 body（鉴权由同源 cookie 自动携带）", async () => {
     const fetchMock = mockFetchOnce({ ok: true, status: 200, json: async () => ({ savedAt: "2026-07-04T10:00:00.000Z" }) });
-    const result = await pushRemoteSave("secret", '{"foo":"bar"}');
+    const result = await pushRemoteSave('{"foo":"bar"}');
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/save",
       expect.objectContaining({
         method: "PUT",
-        headers: { "X-Sync-Passphrase": "secret", "content-type": "application/json; charset=utf-8" },
+        headers: { "content-type": "application/json; charset=utf-8" },
         body: '{"foo":"bar"}',
       }),
     );
     expect(result.savedAt).toBe("2026-07-04T10:00:00.000Z");
-  });
-});
-
-describe("testPassphrase", () => {
-  it("远程存在存档且口令正确 -> true", async () => {
-    mockFetchOnce({ ok: true, status: 200, text: async () => "{}", headers: { get: () => null } as unknown as Headers });
-    expect(await testPassphrase("secret")).toBe(true);
-  });
-
-  it("远程没有存档但口令正确（404）也算验证通过", async () => {
-    mockFetchOnce({ ok: false, status: 404, json: async () => ({ error: "云端还没有存档。" }) });
-    expect(await testPassphrase("secret")).toBe(true);
-  });
-
-  it("口令错误（401）-> false", async () => {
-    mockFetchOnce({ ok: false, status: 401, json: async () => ({ error: "口令不正确。" }) });
-    expect(await testPassphrase("wrong")).toBe(false);
   });
 });
 
