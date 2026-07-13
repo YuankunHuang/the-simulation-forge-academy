@@ -1,3 +1,5 @@
+> **Addendum (2026-07-12):** This file is the frozen original generation prompt/spec, kept for historical record. The career North Star it describes ("deterministic realtime simulation engineer") was revised in `documents/career-strategy.md` (job-search repo) to "trusted simulation infrastructure engineer" — determinism is now framed as a core engineering method, not the terminal job title. The M9-M13 milestones and their regions specified below have since been **removed entirely** from the app (the Act I mainline now ends at `boss_benchmark`, the Public Demo Slice). See `docs/CHANGELOG.md` v0.6 for the full migration. Do not edit the body below; track drift in the changelog instead.
+
 You are Fable 5 working inside Cursor as an elite product engineer, UX designer, frontend architect, learning-science designer, and game systems designer.
 
 Build a complete, deployable, local-first web app MVP called:

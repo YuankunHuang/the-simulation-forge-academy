@@ -15,11 +15,6 @@ const REGION_GATES: Record<string, string | null> = {
   bridge_village: "q_r0",
   production_basecamp: "q_r0",
   benchmark_plains: "boss_bridge",
-  layout_archives: "boss_benchmark",
-  safety_clinic: "boss_layout",
-  package_harbor: "boss_safety",
-  mobile_gate: "boss_package",
-  observatory_annex: "boss_mobile",
 };
 
 export function isQuestCompleted(completedIds: readonly string[], questId: string): boolean {

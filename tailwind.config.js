@@ -41,6 +41,11 @@ export default {
           deep: "#7A5C9E",
         },
         stone2: "#8F887B",
+        frost: {
+          light: "#BFDAD6",
+          DEFAULT: "#6FA8A0",
+          deep: "#4C7D76",
+        },
       },
       fontFamily: {
         body: [

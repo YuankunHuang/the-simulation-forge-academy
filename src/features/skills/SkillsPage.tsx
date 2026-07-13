@@ -28,6 +28,7 @@ const ACCENT_RING: Record<string, string> = {
   moss: "border-moss/60 bg-moss/10 text-moss-deep",
   wood: "border-wood/50 bg-wood/10 text-wood-dark",
   plum: "border-plum/60 bg-plum/10 text-plum-deep",
+  frost: "border-frost/60 bg-frost/10 text-frost-deep",
   stone: "border-stone2/50 bg-stone2/10 text-stone2",
 };
 

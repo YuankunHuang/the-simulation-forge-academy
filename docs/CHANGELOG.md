@@ -1,5 +1,40 @@
 # 变更日志
 
+## v0.6 — 战略重铸：从「确定性实时仿真」到「可信仿真基础设施」（2026-07-12）
+
+`documents/career-strategy.md` 完成一轮基于市场证据的评估后，学院的北极星与主线随之修正。核心判断：确定性是核心工程方法，不是终局职位；真正稀缺、有护城河的是「grounded」的可信仿真证据。本次只重铸世界观与地图/技能结构，不改变任何解锁机制或已完成任务的内容深度。
+
+### 世界结构：Act I 收口，M9-M13 整体删除
+
+- 主线 Act I 现在只到「基准测试平原」的试炼之门（`boss_benchmark`，对应 career-strategy.md 的 Public Demo Slice / 旗舰冻结点），`boss_benchmark` 不再解锁后续任务。
+- **M9-M13 及其 4 座 Boss 之门（内存布局 / 安全边界 / UPM 打包 / Android IL2CPP / XR 观测台）整体删除**：任务、5 个区域（`layout_archives`/`safety_clinic`/`package_harbor`/`mobile_gate`/`observatory_annex`）、9 件神器、8 张复习卡、14 条米拉台词、8 个仅由它们支撑的技能节点（ResultCode、No Exceptions、Editor Diagnostics、UPM、Unsafe Pointer、Memory Layout、Process Basics、Failure Mode Explanation）以及称号阶梯的最后两级。这些内容服务于已废弃的「Unity native/SDK/tools 职业锚点」叙事——按「一个旗舰 + 若干配角」组合模型，Boundary Lab 是配角证据，不值得继续加深。
+- `skill_blog`（长文写作）改由 `boss_benchmark` 提供证据；`skill_import_settings` 收敛为仅由 M2 支撑。
+
+### Act II / III 主题重铸（仍为地图剪影，无任务内容）
+
+- Act II：「内核铸造者」→「**应用物理学徒**」。区域重铸为固定时间步花园（保留）、数值积分草甸、约束与接触峡谷、稳定性沼泽、参数敏感度荒野、精度与吞吐之门、MuJoCo 前哨站——对齐应用刚体物理与 MuJoCo 实践者学习优先级。
+- Act III：「确定性架构师」→「**可复现性工匠**」。区域重铸为方差观测台、Docker 铸造坊、回归门大教堂、仿真基础设施城塞（保留）、作品集荣誉殿堂——对齐可复现性/回归工件与容器化学习优先级。
+
+### 技能树：新增仿真平台基础设施
+
+- 新增第七棵技能树 `tree_sim_platform`（frost 色系，新增 Tailwind 颜色族）：14 个未来节点覆盖刚体基础、数值积分、约束接触、稳定性漂移、参数敏感性、精度吞吐权衡、Docker 化、无头执行、MuJoCo/Isaac Lab、方差分析、可复现性工件、CI 回归门、sim-to-real 词汇。`sourceQuestIds` 均为空（迷雾中的未来篇章，与 `tree_determinism` 同规则）。
+- `tree_determinism` 更名为「确定性方法」（英文 Determinism as a Method），去掉「终局身份」暗示。
+
+### 身份叙事修正
+
+- R0（点燃炉火）的转型路径概念链、AI Prompt、面试讲法改为：Unity Production Engineer → 仿真行业 Unity/实时 3D 桥梁工程师（Stage 1）→ 可信仿真基础设施工程师（North Star）。
+- 「炉火誓约」神器（`art_r0`）的 proves/careerValue/简历句同步改写，不再写「确定性仿真基础设施工程师」这一过时终局身份。
+
+### 测试
+
+- `unlockEngine` / `questEngine` / `reviewEngine` / `contentIntegrity` 的断言随删除更新（Boss 数 6 → 2；主线收官后推荐直接转向营地支线；Act II 首区取代旧档案馆成为收官后的预览位）。测试总数不变，**116 个全部通过**（含 worker 测试）。
+
+### 未变更
+
+- 迷雾推导规则、Boss 门槛逻辑、支线独立解锁机制本身、存档结构——全部沿用现有实现。M0-M8 与营地 B1-B6 的工坊级内容深度不受影响。
+
+---
+
 ## v0.5 — Boss 答辩体验：逐题引导 + AI 演练（2026-07-04）
 
 Boss 之门从「一排普通表单」升级为面试式的逐题答辩体验。适用于全部 6 座 Boss，无需修改任何任务内容。

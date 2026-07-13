@@ -32,27 +32,24 @@ describe("unlockEngine · 区域迷雾", () => {
     const vis = getRegionVisibility(["q_r0"]);
     expect(vis.bridge_village).toBe("unlocked");
     expect(vis.benchmark_plains).toBe("preview");
-    expect(vis.layout_archives).toBe("fogged");
   });
 
   it("越过初次信号之门后平原解锁", () => {
     const completed = ["q_r0", "m0", "m1", "m2", "m3", "boss_bridge"];
     expect(isRegionUnlocked("benchmark_plains", completed)).toBe(true);
     const vis = getRegionVisibility(completed);
-    expect(vis.layout_archives).toBe("preview");
+    expect(vis.fixed_timestep_garden).toBe("preview");
   });
 
   it("Act II 区域在 MVP 中永不解锁（只可能是预览或迷雾）", () => {
     const allAct1 = [
       "q_r0", "m0", "m1", "m2", "m3", "boss_bridge",
       "m4", "m5", "m6", "m7", "m8", "boss_benchmark",
-      "m9", "boss_layout", "m10", "boss_safety",
-      "m11", "boss_package", "m12", "boss_mobile", "m13",
     ];
     const vis = getRegionVisibility(allAct1);
-    expect(vis.observatory_annex).toBe("unlocked");
+    expect(vis.benchmark_plains).toBe("unlocked");
     expect(vis.fixed_timestep_garden).toBe("preview");
-    expect(vis.input_log_workshop).toBe("fogged");
+    expect(vis.integration_meadow).toBe("fogged");
   });
 });
 

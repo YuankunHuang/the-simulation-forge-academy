@@ -47,7 +47,7 @@ export const BONUS_DUNGEONS: BonusDungeon[] = [
     name: "回放时间线玩具",
     nameEn: "Replay Timeline Toy",
     purpose: "在预计算帧数据上构建一个简单的时间线拖动器。",
-    portfolioValue: "为确定性仿真回放查看器（Act III）提前热身。",
+    portfolioValue: "为可复现性回放查看器（Act III）提前热身。",
     costGold: 400,
     prerequisiteQuestIds: ["m8"],
     scope: [

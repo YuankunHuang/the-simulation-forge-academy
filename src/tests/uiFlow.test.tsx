@@ -81,7 +81,7 @@ describe("闯关闭环", () => {
 
     // 步骤 4：提交证据
     const intention = await screen.findByLabelText(/一句话意图/);
-    fireEvent.change(intention, { target: { value: "我正在成为确定性仿真工程师。" } });
+    fireEvent.change(intention, { target: { value: "我正在成为可信仿真基础设施工程师。" } });
     const project = screen.getByLabelText(/当前主线项目/);
     fireEvent.change(project, { target: { value: "Unity Native Boundary Lab" } });
 

@@ -2,7 +2,13 @@ import type { Quest } from "@/types/domain";
 
 /**
  * Unity Native Boundary Lab — 全部任务种子内容。
- * R0 引导任务 + M0–M13 里程碑 + 6 座 Boss 之门。
+ * R0 引导任务 + M0–M8 里程碑 + 2 座 Boss 之门 + 生产经验营地（B1–B6）。
+ *
+ * 战略修订（2026-07-12）：主线在 boss_benchmark（Public Demo Slice）止步。
+ * 旧 M9–M13 与其 4 座 Boss 之门（内存布局/安全边界/UPM 打包/Android/XR）已随
+ * career-strategy.md 的范围裁决整体删除——它们服务于已废弃的
+ * 「Unity native/SDK/tools 职业锚点」叙事。Act II（应用物理）/ Act III（可复现性）
+ * 的任务内容将在主线收工后铸造。
  */
 
 function forgePrompt(code: string, title: string, goal: string, extra?: string): string {
@@ -63,7 +69,7 @@ export const QUESTS: Quest[] = [
         id: "intention",
         type: "text_reflection",
         label: "一句话意图（你正在试图成为什么）",
-        placeholder: "例如：我正在从 Unity 生产工程师，转向能设计 managed/native 边界与确定性仿真内核的运行时工程师。",
+        placeholder: "例如：我正在从 Unity 生产工程师，先以 Unity/实时 3D 桥接进入仿真行业，再走向能为仿真结果的可靠性负责的可信仿真基础设施工程师。",
         multiline: true,
       },
       {
@@ -87,7 +93,7 @@ export const QUESTS: Quest[] = [
     aiPrompt: forgePrompt(
       "R0",
       "点燃炉火",
-      "梳理我的职业转型路径：Unity Mobile Production Engineer → Unity/C++ Boundary & Runtime Tooling Engineer → Headless C++ Deterministic Simulation Builder → Deterministic Realtime Simulation Infrastructure Engineer。帮我把这条路径压缩成一句『我正在试图成为什么』的意图宣言，并解释为什么 Unity Native Boundary Lab 是这条路径正确的第一个项目。",
+      "梳理我的职业转型路径：Unity Mobile Production Engineer → 仿真行业里的 Unity/实时 3D 桥梁工程师（Stage 1，立即优先）→ 仿真平台/验证/回归工程师（Stage 2，2-4 年目标）→ 可信仿真基础设施工程师（North Star：为 Physical AI、机器人、数字孪生、训练仿真的可靠性负责）。确定性是这条路径上的核心方法，不是终点职位。帮我把这条路径压缩成一句『我正在试图成为什么』的意图宣言，并解释为什么 Unity Native Boundary Lab（作为支撑性证据，已裁剪至最小公开切片）和后续的 MuJoCo 可复现性项目分别在这条路径上扮演什么角色。",
     ),
     resources: [
       { label: "roadmap.sh / C++", url: "https://roadmap.sh/cpp", note: "只看地图全貌，不要开始学习" },
@@ -98,15 +104,15 @@ export const QUESTS: Quest[] = [
       "跳过仪式直接写代码——没有北极星的代码会跑偏。",
     ],
     interviewExplanation:
-      "我用一套系统把项目工作转化为显性证据，支撑从 Unity 生产开发到 native runtime 与确定性仿真基础设施的转型。",
+      "我用一套系统把项目工作转化为显性证据，支撑从 Unity 生产开发先桥接进入仿真行业、再走向可信仿真基础设施工程师的转型。",
     nextRisk: "仪式感之后最怕停留。下一步直接创建仓库脚手架（M0），不要再『准备』。",
     unlocks: ["m0"],
     estimate: "10–15 分钟",
     conceptMap: [
       "Unity Production Engineer",
-      "Boundary Apprentice（边界学徒）",
-      "Native Runtime Integrator（原生运行时集成者）",
-      "Deterministic Simulation Engineer（确定性仿真工程师）",
+      "Boundary Apprentice（边界学徒，支撑性证据）",
+      "Simulation-Industry Bridge Engineer（仿真行业桥梁工程师，Stage 1）",
+      "Trusted Simulation Infrastructure Engineer（可信仿真基础设施工程师，North Star）",
     ],
     filesToCreate: [
       "不需要写代码。",
@@ -141,7 +147,7 @@ export const QUESTS: Quest[] = [
     narrativeHook: "桥梁不是从第一行复杂代码开始的。它从边界、结构、命名和 thesis 开始。",
     objective: "创建 Unity Native Boundary Lab 的仓库脚手架。",
     whyItMatters:
-      "这一步证明你把项目定位为严肃的边界研究（boundary research），而不是一个随手的 native DLL demo。清晰的结构会在后续 13 个里程碑里持续回报你。",
+      "这一步证明你把项目定位为严肃的边界研究（boundary research），而不是一个随手的 native DLL demo。清晰的结构会在后续每一个里程碑里持续回报你。",
     prerequisites: ["q_r0"],
     definitionOfDone: [
       "GitHub 仓库存在，或本地 repo 已初始化。",
@@ -149,7 +155,6 @@ export const QUESTS: Quest[] = [
       "README 包含一段论文式 thesis（一段话）。",
       "docs 骨架存在。",
       "Unity 工程目录存在。",
-      "UPM 包目录存在。",
       "完成第一次 commit。",
     ],
     evidenceRequired: [
@@ -182,11 +187,10 @@ export const QUESTS: Quest[] = [
     aiPrompt: forgePrompt(
       "M0",
       "项目脚手架",
-      "创建 Unity Native Boundary Lab 仓库：native/、unity/、docs/ 三个顶层目录，README 一段话 thesis（Native C++ 不自动等于更快；边界设计、批处理、布局、生命周期与诊断决定 interop 是助力还是拖累），docs 骨架（ARCHITECTURE.md / INTEROP_DESIGN.md / BENCHMARK_METHODOLOGY.md），Unity 工程目录与 UPM 包目录（或规划路径），.gitignore，并完成首次 commit。只做 M0 —— 不要开始 M1/M2/M3。",
+      "创建 Unity Native Boundary Lab 仓库：native/、unity/、docs/ 三个顶层目录，README 一段话 thesis（Native C++ 不自动等于更快；边界设计、批处理、布局、生命周期与诊断决定 interop 是助力还是拖累），docs 骨架（ARCHITECTURE.md / INTEROP_DESIGN.md / BENCHMARK_METHODOLOGY.md），Unity 工程目录，.gitignore，并完成首次 commit。只做 M0 —— 不要开始 M1/M2/M3。",
     ),
     resources: [
       { label: "GitHub — 新建仓库", url: "https://docs.github.com/repositories/creating-and-managing-repositories" },
-      { label: "Unity — 自定义包结构", url: "https://docs.unity3d.com/Manual/cus-layout.html", note: "只看目录约定" },
     ],
     commonTraps: [
       "thesis 没想清楚就开始实现。",
@@ -206,7 +210,6 @@ export const QUESTS: Quest[] = [
       "docs 骨架",
       "native 目录",
       "Unity 工程",
-      "UPM 包骨架",
       "首次 commit",
     ],
     filesToCreate: [
@@ -216,7 +219,6 @@ export const QUESTS: Quest[] = [
       "docs/BENCHMARK_METHODOLOGY.md",
       "native/（空目录 + 占位说明）",
       "unity/（Unity 工程目录）",
-      "UPM 包目录占位或规划路径",
       ".gitignore",
       "首次 commit",
     ],
@@ -1239,8 +1241,8 @@ export const QUESTS: Quest[] = [
     resources: [],
     commonTraps: ["把展示草稿写成流水账。聚焦一个反直觉结论：native 不一定更快。", "在草稿里夸大结论。"],
     interviewExplanation: "我设计了隔离渲染成本的基准方法论，并用 median/p95、GC alloc 与 checksum 支撑结论。",
-    nextRisk: "档案馆的内存布局实验容易发散。记住每个实验都要产出可对比的表格。",
-    unlocks: ["m9"],
+    nextRisk: "主线在此收官。最大的风险是恋战：给项目加 CI 门禁、发布 README，然后封盘——下一站是应用物理与 MuJoCo，不是更多边界功能。",
+    unlocks: [],
     estimate: "45–60 分钟",
     conceptMap: [
       "四模式基准导出",
@@ -1248,7 +1250,7 @@ export const QUESTS: Quest[] = [
       "90 秒讲解",
       "首篇公开草稿",
       "平原试炼之印",
-      "Layout Archives 开启",
+      "Act I 主线收官",
     ],
     filesToCreate: [
       "不写新代码。",
@@ -1268,682 +1270,6 @@ export const QUESTS: Quest[] = [
       "草稿写不动：从那张四模式对比表开始，让数据先说话。",
     ],
     publicShowcaseSeed: "这是 Act I 公开 demo 切片（Agent Swarm Boundary Benchmark）的发布时刻——第一条真正建议公开的 LinkedIn/GitHub 内容。",
-  },
-
-  // ------------------------------------------------------------
-  // M9 — 内存布局实验室
-  // ------------------------------------------------------------
-  {
-    id: "m9",
-    code: "M9",
-    title: "内存布局实验室",
-    regionId: "layout_archives",
-    type: "main",
-    order: 12,
-    narrativeHook: "档案馆的卷轴上写着：数据的形状，决定它旅行的速度。",
-    objective: "构建 AoS/SoA、natural/packed、copy/pointer 路径的对照实验。",
-    whyItMatters:
-      "布局是性能与契约的交汇点。理解 AoS 与 SoA、对齐与 padding、复制与借用指针的边界约束，你才真正拥有'数据视角'。",
-    prerequisites: ["boss_benchmark"],
-    definitionOfDone: [
-      "AoS 与 SoA 两种变体存在。",
-      "natural 与 packed 布局对比存在。",
-      "布局尺寸被报告。",
-      "pointer 路径被文档化为高级且受约束的路径。",
-      "native 不在调用结束后保留借来的 Unity 指针。",
-      "产出内存布局报告。",
-    ],
-    evidenceRequired: [
-      { id: "commit", type: "commit_hash", label: "Commit Hash", placeholder: "例如 a1b2c3d" },
-      {
-        id: "layout_report",
-        type: "doc_section",
-        label: "布局报告",
-        placeholder: "粘贴报告关键结论或文件路径",
-        multiline: true,
-      },
-      { id: "table_shot", type: "screenshot_note", label: "对比表截图", placeholder: "截图路径" },
-      {
-        id: "pack1",
-        type: "text_reflection",
-        label: "为什么 Pack=1 不是魔法？",
-        placeholder: "对齐、未对齐访问代价、平台差异……",
-        multiline: true,
-      },
-    ],
-    skills: ["skill_memory_layout", "skill_unsafe_ptr", "skill_blog"],
-    artifactIds: ["art_m9"],
-    rewards: { xp: 220, gold: 110, skillPoints: 3, reputation: 10, insight: 0 },
-    aiPrompt: forgePrompt(
-      "M9",
-      "内存布局实验室",
-      "设计布局实验：AoS vs SoA 的 agent 数据（两侧一致）、natural vs packed（Pack=1）布局的 sizeof/offset 报告、copy 路径 vs pinned pointer 路径的约束对比；明确规则：native 不得在调用结束后保留借来的指针；产出一份 Markdown 布局报告。",
-    ),
-    resources: [
-      { label: "cppreference — 对齐", url: "https://en.cppreference.com/w/cpp/language/object#Alignment" },
-      { label: "Microsoft — Marshalling", url: "https://learn.microsoft.com/dotnet/standard/native-interop/type-marshalling" },
-    ],
-    commonTraps: ["把 Pack=1 当优化默认值。", "SoA 实验只做一半（native 侧没改）。", "borrowed pointer 生命周期越界。"],
-    interviewExplanation: "我理解数据布局与边界契约，而不只是语法。",
-    nextRisk: "布局之后是失败处理。别把'能跑'当作'安全'。",
-    unlocks: ["boss_layout"],
-    estimate: "120–180 分钟",
-    conceptMap: [
-      "AoS vs SoA",
-      "natural vs packed（Pack=1）",
-      "对齐与 padding",
-      "copy 路径 vs pinned pointer 路径",
-      "借用指针规则",
-      "布局报告",
-    ],
-    filesToCreate: [
-      "SoA 变体的数据定义与步进（双侧一致）",
-      "packed（Pack=1）对照 struct",
-      "sizeof/offset 报告生成（两侧打印对表）",
-      "pointer 路径的约束文档",
-      "docs/layout-report.md（对比结论）",
-    ],
-    steps: [
-      "实现 SoA 变体：位置/速度拆成独立数组，双侧同步修改。",
-      "定义 packed 对照组，打印两侧 sizeof/offset 表。",
-      "对比 copy 路径与 pinned pointer 路径的行为与约束。",
-      "写死规则：native 不得在调用结束后保留借来的 Unity 指针。",
-      "把全部数据整理成 layout-report.md 的对比表格。",
-      "提交报告与关键结论。",
-    ],
-    debuggingNotes: [
-      "SoA 结果不对：多半是某一侧忘了改布局——用 checksum 快速定位。",
-      "packed 更慢不要惊讶：未对齐访问的代价因平台而异，记录下来就是结论。",
-      "pinned 指针崩溃：检查 GCHandle 生命周期是否覆盖整个 native 调用。",
-    ],
-    publicShowcaseSeed: "layout-report.md 的对比表（尤其 Pack=1 何时更慢的反直觉数据）是硬核博客《数据的形状决定它旅行的速度》的地基。",
-  },
-
-  // ------------------------------------------------------------
-  // BOSS — Blittable 契约
-  // ------------------------------------------------------------
-  {
-    id: "boss_layout",
-    code: "BOSS",
-    title: "Blittable 契约之印",
-    regionId: "layout_archives",
-    type: "boss",
-    order: 13,
-    narrativeHook: "档案馆长合上卷轴：把你学到的布局法则，盖上你自己的印章。",
-    objective: "汇总布局实验成果，完成 Blittable 契约的答辩。",
-    whyItMatters: "布局知识只有在能被清晰转述时才算资产。这道门把实验数据变成你的语言。",
-    prerequisites: ["m9"],
-    definitionOfDone: ["M9 完成且布局报告存在。", "能在 60 秒内回答 AoS/SoA 的选择依据。"],
-    evidenceRequired: [
-      {
-        id: "report_loc",
-        type: "doc_section",
-        label: "布局报告位置",
-        placeholder: "docs/layout-report.md 或链接",
-      },
-      {
-        id: "aos_soa",
-        type: "text_reflection",
-        label: "60 秒回答：什么时候选 AoS，什么时候选 SoA？",
-        placeholder: "访问模式、缓存行、边界传输……",
-        multiline: true,
-      },
-    ],
-    skills: [],
-    artifactIds: ["art_boss_layout"],
-    rewards: { xp: 300, gold: 140, skillPoints: 0, reputation: 20, insight: 2 },
-    aiPrompt: forgePrompt(
-      "BOSS",
-      "Blittable 契约之印",
-      "扮演面试官，就 AoS vs SoA、对齐与 padding、blittable 约束对我进行 5 个问题的快问快答，并对我的回答给出改进版本。",
-    ),
-    resources: [],
-    commonTraps: ["答辩时罗列术语而不给判断标准。"],
-    interviewExplanation: "我能基于访问模式与边界传输成本，为具体场景选择数据布局。",
-    nextRisk: "诊所里的失败注入需要耐心。安全边界的价值恰恰在'不崩溃'这种看不见的地方。",
-    unlocks: ["m10"],
-    estimate: "20–30 分钟",
-    conceptMap: ["布局报告", "AoS/SoA 判断标准", "60 秒答辩", "契约之印"],
-    filesToCreate: ["不写新代码。", "布局报告位置确认。", "AoS/SoA 选择标准的 60 秒回答。"],
-    steps: [
-      "重读 layout-report.md 的对比表。",
-      "不看报告，口头回答：什么时候选 AoS，什么时候选 SoA？",
-      "把回答压缩到 60 秒并写下来（要判断标准，不要术语堆砌）。",
-      "提交答辩。",
-    ],
-    debuggingNotes: ["回答只剩术语时，强制自己以『如果访问模式是 X，我选 Y，因为 Z』的句式重写。"],
-    publicShowcaseSeed: "60 秒 AoS/SoA 判断标准是技术面试的高频弹药，也可以浓缩成一条高质量技术短帖。",
-  },
-
-  // ------------------------------------------------------------
-  // M10 — 安全与错误边界
-  // ------------------------------------------------------------
-  {
-    id: "m10",
-    code: "M10",
-    title: "安全与错误边界",
-    regionId: "safety_clinic",
-    type: "main",
-    order: 14,
-    narrativeHook: "诊所的守则写在门口：失败不可怕，不可恢复的失败才可怕。",
-    objective: "实现 ResultCode、LastError、native catch 边界、日志回调与无效输入测试。",
-    whyItMatters:
-      "生产级 wrapper 与 demo 的区别在失败路径。让 native 异常止步于 ABI、让每个失败可查询可恢复，gameplay 团队才敢用你的库。",
-    prerequisites: ["boss_layout"],
-    definitionOfDone: [
-      "可恢复失败返回 result code。",
-      "LastError 可查询。",
-      "存在无效 handle 测试。",
-      "存在 buffer-too-small 测试。",
-      "双重 Dispose 依然安全。",
-      "native 异常不会有意跨越 C ABI。",
-      "文档警告：内存损坏仍可能使进程崩溃。",
-    ],
-    evidenceRequired: [
-      { id: "commit", type: "commit_hash", label: "Commit Hash", placeholder: "例如 a1b2c3d" },
-      { id: "diag_shot", type: "screenshot_note", label: "诊断信息截图", placeholder: "截图路径" },
-      {
-        id: "injection_note",
-        type: "text_reflection",
-        label: "失败注入记录",
-        placeholder: "你注入了哪些失败？系统如何反应？",
-        multiline: true,
-      },
-      {
-        id: "safety_explain",
-        type: "text_reflection",
-        label: "安全边界解释",
-        placeholder: "为什么异常不能跨 C ABI？wrapper 能保证什么、不能保证什么？",
-        multiline: true,
-      },
-    ],
-    skills: ["skill_result_code", "skill_no_exceptions", "skill_editor_diag", "skill_process", "skill_failure_explain"],
-    artifactIds: ["art_m10"],
-    rewards: { xp: 220, gold: 110, skillPoints: 3, reputation: 0, insight: 0 },
-    aiPrompt: forgePrompt(
-      "M10",
-      "安全与错误边界",
-      "设计 NblResultCode 枚举与所有 API 的返回码化；实现 NblGetLastError；native 边界统一 try/catch 并转换为 result code；提供日志回调注册；编写无效 handle 与 buffer-too-small 的失败注入测试；文档写明 wrapper 的安全边界与局限。",
-    ),
-    resources: [
-      { label: "Microsoft — 互操作最佳实践", url: "https://learn.microsoft.com/dotnet/standard/native-interop/best-practices" },
-    ],
-    commonTraps: ["让 C++ 异常穿过 ABI。", "错误码没有配套的 LastError 细节。", "只测试快乐路径。"],
-    interviewExplanation: "wrapper 让 native 代码可以被 gameplay 代码更安全地消费。",
-    nextRisk: "安全完成后，警惕'再加一个功能'的冲动——下一步是打包，不是扩展。",
-    unlocks: ["boss_safety"],
-    estimate: "120–180 分钟",
-    conceptMap: [
-      "NblResultCode 枚举",
-      "全 API 返回码化",
-      "NblGetLastError",
-      "边界 try/catch",
-      "日志回调注册",
-      "失败注入测试",
-      "安全边界文档",
-    ],
-    filesToCreate: [
-      "nbl_api.h：NblResultCode + 所有 API 签名改造",
-      "native 侧统一 catch 边界与 LastError 存储",
-      "日志回调注册 API（函数指针）",
-      "C# 侧错误检查 wrapper",
-      "失败注入测试（无效 handle / buffer 太小 / 双重销毁）",
-      "docs 安全边界与局限声明",
-    ],
-    steps: [
-      "设计 NblResultCode：Ok、InvalidHandle、InvalidArgument、BufferTooSmall、InternalError。",
-      "把所有导出 API 改为返回 result code，输出参数走指针。",
-      "实现 NblGetLastError（线程局部或 context 局部的详细信息）。",
-      "在每个导出函数体包统一 try/catch，把异常转成 InternalError。",
-      "提供日志回调注册，让 native 日志流进 Unity Console。",
-      "写失败注入测试：传空句柄、传小 buffer、双重销毁——逐一验证可恢复。",
-      "在文档写明：内存损坏仍可能使进程崩溃，wrapper 的保证有边界。",
-      "提交测试记录与文档。",
-    ],
-    debuggingNotes: [
-      "异常还是穿出去了：检查是否有 noexcept 路径漏包，或回调里抛了托管异常。",
-      "LastError 被覆盖：确认存储粒度（全局 vs per-context vs 线程局部）并写进文档。",
-      "日志回调崩溃：managed 委托要用 GCHandle 钉住，防止被回收。",
-    ],
-    publicShowcaseSeed: "失败注入清单 + 『wrapper 能保证什么、不能保证什么』声明，是《生产级 native wrapper 与 demo 的分水岭》一文的骨架。",
-  },
-
-  // ------------------------------------------------------------
-  // BOSS — 可恢复失败试炼
-  // ------------------------------------------------------------
-  {
-    id: "boss_safety",
-    code: "BOSS",
-    title: "可恢复失败试炼",
-    regionId: "safety_clinic",
-    type: "boss",
-    order: 15,
-    narrativeHook: "主治医师递来最后一份病历：请描述一次你亲手治愈的失败。",
-    objective: "完成安全边界的答辩与失败案例总结。",
-    whyItMatters: "能条理清晰地讲述失败处理设计，是系统工程师面试中最值钱的能力之一。",
-    prerequisites: ["m10"],
-    definitionOfDone: ["M10 完成。", "总结全部失败注入实验。", "能回答：为什么异常不能跨 C ABI？"],
-    evidenceRequired: [
-      {
-        id: "injection_summary",
-        type: "text_reflection",
-        label: "失败注入实验总结",
-        placeholder: "列出注入的失败类型与系统表现",
-        multiline: true,
-      },
-      {
-        id: "defense",
-        type: "text_reflection",
-        label: "安全边界答辩（90 秒）",
-        placeholder: "result code 设计、LastError、异常边界、已知局限",
-        multiline: true,
-      },
-    ],
-    skills: [],
-    artifactIds: ["art_boss_safety"],
-    rewards: { xp: 300, gold: 140, skillPoints: 0, reputation: 20, insight: 2 },
-    aiPrompt: forgePrompt(
-      "BOSS",
-      "可恢复失败试炼",
-      "扮演面试官，围绕我的错误边界设计追问：为什么不用异常跨 ABI？result code 与 LastError 如何配合？哪些失败可恢复、哪些不可？帮我打磨出 90 秒答辩版本。",
-    ),
-    resources: [],
-    commonTraps: ["把'没崩溃'当成'安全'的全部定义。"],
-    interviewExplanation: "我能设计并讲清 native 库的失败模型：可恢复、可诊断、有边界。",
-    nextRisk: "打包是面向他人的工程。港口的标准比你想象的更严格。",
-    unlocks: ["m11"],
-    estimate: "20–30 分钟",
-    conceptMap: ["失败注入实验清单", "可恢复 vs 不可恢复", "90 秒答辩", "失败协议之印"],
-    filesToCreate: ["不写新代码。", "失败注入实验总结。", "90 秒安全边界答辩文本。"],
-    steps: [
-      "列出全部注入过的失败与系统反应。",
-      "划出边界：哪些失败可恢复（返回码），哪些不可（进程级）。",
-      "让 AI 追问你 result code / LastError / 异常边界的设计取舍。",
-      "写下 90 秒答辩版本，提交。",
-    ],
-    debuggingNotes: ["答辩发虚的部分回 M10 补一个注入实验——亲手崩过的地方讲起来才有底气。"],
-    publicShowcaseSeed: "『我亲手治愈的一次失败』的 STAR 化版本，是系统工程面试里最值钱的故事模板。",
-  },
-
-  // ------------------------------------------------------------
-  // M11 — UPM 打包
-  // ------------------------------------------------------------
-  {
-    id: "m11",
-    code: "M11",
-    title: "UPM 打包",
-    regionId: "package_harbor",
-    type: "main",
-    order: 16,
-    narrativeHook: "港口的规矩：货物必须装箱、贴标、可追溯，才能登船。",
-    objective: "把 runtime/editor 代码移入干净的 UPM 包，带 Samples~ 与 asmdef。",
-    whyItMatters:
-      "从'我的场景里能跑'到'任何人 import 就能跑'，是从 demo 作者到工具工程师的一跃。UPM 包是 Unity 生态里开发者工具的通用语言。",
-    prerequisites: ["boss_safety"],
-    definitionOfDone: [
-      "包目录结构存在。",
-      "Runtime asmdef 存在。",
-      "Editor asmdef 存在。",
-      "Samples~ 包含 HelloNative 与 AgentSwarmBenchmark。",
-      "全新 Unity 工程可导入包并运行 sample。",
-      "包 README 存在。",
-    ],
-    evidenceRequired: [
-      { id: "commit", type: "commit_hash", label: "Commit Hash", placeholder: "例如 a1b2c3d" },
-      { id: "pkg_shot", type: "screenshot_note", label: "包目录截图", placeholder: "截图路径" },
-      {
-        id: "fresh_validate",
-        type: "text_reflection",
-        label: "全新工程验证记录",
-        placeholder: "新工程 import 的步骤与结果",
-        multiline: true,
-      },
-      {
-        id: "quickstart",
-        type: "doc_section",
-        label: "包 README quickstart",
-        placeholder: "粘贴 quickstart 段落",
-        multiline: true,
-      },
-    ],
-    skills: ["skill_upm"],
-    artifactIds: ["art_m11"],
-    rewards: { xp: 260, gold: 130, skillPoints: 2, reputation: 20, insight: 0 },
-    aiPrompt: forgePrompt(
-      "M11",
-      "UPM 打包",
-      "把 Native Boundary Lab 的 runtime/editor 代码整理成 UPM 包：package.json、Runtime/ 与 Editor/ 各配 asmdef、Samples~ 下放 HelloNative 与 AgentSwarmBenchmark 两个样例、native 插件按平台放置、写包 README 与 quickstart；并在一个全新 Unity 工程验证 import。",
-    ),
-    resources: [
-      { label: "Unity — 自定义包", url: "https://docs.unity3d.com/Manual/CustomPackages.html" },
-      { label: "Unity — Assembly Definitions", url: "https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html" },
-    ],
-    commonTraps: ["Samples 直接放在 Runtime 里。", "asmdef 引用关系混乱。", "包 README 假设读者了解你的项目背景。"],
-    interviewExplanation: "我能交付面向开发者的 Unity 工具，而不只是场景 demo。",
-    nextRisk: "移动端之门的构建链路更长。给自己预留完整的一块时间，不要碎片化推进。",
-    unlocks: ["boss_package"],
-    estimate: "120–180 分钟",
-    conceptMap: [
-      "package.json",
-      "Runtime / Editor asmdef",
-      "Samples~ 目录",
-      "平台插件放置",
-      "全新工程验证",
-      "quickstart 文档",
-    ],
-    filesToCreate: [
-      "com.yourname.nativeboundary/package.json",
-      "Runtime/ + Runtime asmdef",
-      "Editor/ + Editor asmdef（引用 Runtime）",
-      "Samples~/HelloNative 与 Samples~/AgentSwarmBenchmark",
-      "Plugins 按平台放置的 native 库",
-      "包 README（quickstart 面向零上下文用户）",
-    ],
-    steps: [
-      "创建包目录与 package.json（name/version/displayName/unity 版本）。",
-      "把 runtime 代码移入 Runtime/，配 asmdef。",
-      "Editor 代码移入 Editor/，asmdef 只在 Editor 平台并引用 Runtime。",
-      "把 HelloNative 与 AgentSwarmBenchmark 整理进 Samples~（注意波浪号）。",
-      "native 库按平台放进包内 Plugins 结构并配导入设置。",
-      "写 quickstart：从 import 到跑通 sample 的每一步，不省略『显而易见』。",
-      "开一个全新 Unity 工程，用 file: 或 git url 导入验证。",
-      "提交包结构截图与全新工程验证记录。",
-    ],
-    debuggingNotes: [
-      "Samples 不显示：目录名必须是 Samples~ 且在 package.json 里声明 samples 数组。",
-      "asmdef 循环引用：Editor 引 Runtime 单向，永远不要反向。",
-      "全新工程里 DllNotFound：包内插件导入设置不会自动继承，逐平台检查。",
-    ],
-    publicShowcaseSeed: "『任何人 import 就能跑』的 quickstart GIF 是 README 的门面，也是 Runtime Tooling 岗位叙事的核心画面。",
-  },
-
-  // ------------------------------------------------------------
-  // BOSS — 面向开发者的包
-  // ------------------------------------------------------------
-  {
-    id: "boss_package",
-    code: "BOSS",
-    title: "面向开发者的包",
-    regionId: "package_harbor",
-    type: "boss",
-    order: 17,
-    narrativeHook: "港务长在放行单上只写一句话：换一台船，还能开吗？",
-    objective: "用全新工程验证包的可用性，完成开发者视角的答辩。",
-    whyItMatters: "工具的价值由陌生使用者定义。这道门强制你切换到用户视角。",
-    prerequisites: ["m11"],
-    definitionOfDone: ["M11 完成。", "全新工程 import 验证通过。", "quickstart 能让陌生人 10 分钟跑通。"],
-    evidenceRequired: [
-      {
-        id: "fresh_proof",
-        type: "screenshot_note",
-        label: "全新工程运行 sample 的截图",
-        placeholder: "截图路径",
-      },
-      {
-        id: "quickstart_final",
-        type: "doc_section",
-        label: "最终版 quickstart 段落",
-        placeholder: "粘贴 quickstart",
-        multiline: true,
-      },
-    ],
-    skills: [],
-    artifactIds: ["art_boss_package"],
-    rewards: { xp: 350, gold: 160, skillPoints: 0, reputation: 30, insight: 1 },
-    aiPrompt: forgePrompt(
-      "BOSS",
-      "面向开发者的包",
-      "以'第一次接触本包的 Unity 开发者'身份审查我的 quickstart 与包结构，指出所有会让新用户卡住的地方。",
-    ),
-    resources: [],
-    commonTraps: ["quickstart 里省略'显而易见'的步骤——对新用户没有显而易见。"],
-    interviewExplanation: "我交付过通过全新工程验证的 UPM 包，quickstart 面向零上下文用户。",
-    nextRisk: "Android 构建的失败往往在链路末端才暴露。记录每一步，失败也是里程碑。",
-    unlocks: ["m12"],
-    estimate: "30–45 分钟",
-    conceptMap: ["用户视角切换", "全新工程验证", "quickstart 终稿", "港口放行印"],
-    filesToCreate: ["不写新代码。", "全新工程运行 sample 的截图。", "quickstart 最终稿。"],
-    steps: [
-      "让 AI 以零上下文新用户身份逐行审查 quickstart。",
-      "修掉每一个『其实需要背景知识』的坑。",
-      "在全新工程重跑一遍 import → sample 流程确认。",
-      "提交截图与终稿。",
-    ],
-    debuggingNotes: ["新用户视角最难的是遗忘自己知道的东西——让 AI 扮演比自己硬想有效。"],
-    publicShowcaseSeed: "quickstart GIF + 『10 分钟跑通』的承诺，是包发布帖的最佳开场。",
-  },
-
-  // ------------------------------------------------------------
-  // M12 — Android IL2CPP 验证
-  // ------------------------------------------------------------
-  {
-    id: "m12",
-    code: "M12",
-    title: "Android IL2CPP 验证",
-    regionId: "mobile_gate",
-    type: "main",
-    order: 18,
-    narrativeHook: "石门缓缓开启：这是你最熟悉的战场，带着新的武器回来。",
-    objective: "构建 Android ARM64 .so，配置插件导入设置，运行 IL2CPP development build。",
-    whyItMatters:
-      "这一步把边界工程连接回你的移动端老本行——也是最能打动 Unity 移动团队面试官的组合：既懂移动生产，又懂 native 边界。",
-    prerequisites: ["boss_package"],
-    definitionOfDone: [
-      "Android ARM64 原生库已生成或已规划。",
-      "插件导入设置已文档化。",
-      "IL2CPP development build 已尝试。",
-      "成功或失败都被记录。",
-      "Android 笔记解释了阻塞点与修复路径。",
-    ],
-    evidenceRequired: [
-      { id: "commit", type: "commit_hash", label: "Commit Hash", placeholder: "例如 a1b2c3d" },
-      {
-        id: "build_result",
-        type: "screenshot_note",
-        label: "构建截图或错误日志",
-        placeholder: "截图路径或粘贴关键日志",
-        multiline: true,
-      },
-      {
-        id: "il2cpp_notes",
-        type: "doc_section",
-        label: "Android IL2CPP 笔记",
-        placeholder: "工具链、ABI 目录、导入设置、坑点",
-        multiline: true,
-      },
-      {
-        id: "mobile_reflection",
-        type: "text_reflection",
-        label: "移动端打包反思",
-        placeholder: "与桌面端相比多了哪些约束？",
-        multiline: true,
-      },
-    ],
-    skills: ["skill_import_settings"],
-    artifactIds: ["art_m12"],
-    rewards: { xp: 260, gold: 130, skillPoints: 2, reputation: 15, insight: 0 },
-    aiPrompt: forgePrompt(
-      "M12",
-      "Android IL2CPP 验证",
-      "用 NDK/CMake 工具链交叉编译 ARM64 的 libnbl.so；配置 Unity 插件导入设置（Android/ARM64）；运行 IL2CPP development build 并在真机或模拟器验证版本函数调用；无论成败，写下阻塞点与修复路径。",
-    ),
-    resources: [
-      { label: "Unity — Android native 插件", url: "https://docs.unity3d.com/Manual/android-native-plugins-import.html" },
-      { label: "Android NDK — CMake", url: "https://developer.android.com/ndk/guides/cmake" },
-    ],
-    commonTraps: ["ABI 目录放错（arm64-v8a）。", "IL2CPP 与 Mono 行为差异没验证。", "只在 Editor 验证就宣布成功。"],
-    interviewExplanation: "我验证了移动端 native 打包，这与我的 Unity 移动端背景直接相连。",
-    nextRisk: "主线到此已完整。观测台是可选的甜点——别让甜点变成新的主食。",
-    unlocks: ["boss_mobile"],
-    estimate: "120–240 分钟",
-    conceptMap: [
-      "NDK 工具链",
-      "CMake 交叉编译",
-      "arm64-v8a ABI 目录",
-      "插件导入设置（Android/ARM64）",
-      "IL2CPP development build",
-      "真机验证",
-    ],
-    filesToCreate: [
-      "native 交叉编译脚本或 CMake preset（NDK toolchain file）",
-      "libnbl.so（arm64-v8a 产物）",
-      "Unity 插件目录 Android/arm64-v8a 放置 + 导入设置",
-      "docs/ANDROID_IL2CPP_NOTES.md（链路、坑点、修复路径）",
-    ],
-    steps: [
-      "用 NDK toolchain file 配置 CMake 交叉编译（ANDROID_ABI=arm64-v8a）。",
-      "产出 libnbl.so，确认目标架构（file / llvm-readelf 验证）。",
-      "放进 Unity 的 Android/arm64-v8a 插件路径并配置导入设置。",
-      "切 Android + IL2CPP，跑 development build。",
-      "真机或模拟器上验证版本函数调用。",
-      "无论成败，把每一步与阻塞点写进 ANDROID_IL2CPP_NOTES.md。",
-      "提交构建记录（失败日志同样是合格证据）。",
-    ],
-    debuggingNotes: [
-      "真机 DllNotFound：九成是 ABI 目录或导入设置——先看 APK 里 .so 是否真的被打进去了（解压确认）。",
-      "IL2CPP 链接期报符号错误：确认 DllImport 名称与导出完全一致，IL2CPP 在构建期做静态检查。",
-      "Editor 能跑真机崩：检查 stripping 设置与 [MonoPInvokeCallback]（如有回调）。",
-    ],
-    publicShowcaseSeed: "『桌面到 Android IL2CPP 的完整链路笔记』——含失败与修复路径——是移动 Unity 圈里稀缺且高可信的分享题材。",
-  },
-
-  // ------------------------------------------------------------
-  // BOSS — ARM64 通道
-  // ------------------------------------------------------------
-  {
-    id: "boss_mobile",
-    code: "BOSS",
-    title: "ARM64 通道",
-    regionId: "mobile_gate",
-    type: "boss",
-    order: 19,
-    narrativeHook: "门后是你来时的世界——如今你带着完全不同的眼睛回望它。",
-    objective: "完成移动端验证的总结答辩，为 Act I 画上句号。",
-    whyItMatters: "Act I 的终点。从这里开始，你的简历上可以写下'Unity/C++ Boundary & Runtime Tooling'。",
-    prerequisites: ["m12"],
-    definitionOfDone: ["M12 完成。", "IL2CPP 构建结果（成或败）有完整记录。", "能讲清移动端 native 边界的特殊约束。"],
-    evidenceRequired: [
-      {
-        id: "result_note",
-        type: "screenshot_note",
-        label: "IL2CPP 构建结果记录",
-        placeholder: "截图路径或结果描述",
-      },
-      {
-        id: "blocker_path",
-        type: "text_reflection",
-        label: "阻塞点与修复路径讲解",
-        placeholder: "遇到什么，为什么，怎么解（或计划怎么解）",
-        multiline: true,
-      },
-    ],
-    skills: [],
-    artifactIds: ["art_boss_mobile"],
-    rewards: { xp: 350, gold: 160, skillPoints: 0, reputation: 30, insight: 2 },
-    aiPrompt: forgePrompt(
-      "BOSS",
-      "ARM64 通道",
-      "帮我把 Android IL2CPP 验证的经历整理成一个 STAR 结构的面试故事（情境-任务-行动-结果），突出移动端 native 边界的特殊约束。",
-    ),
-    resources: [],
-    commonTraps: ["把失败的构建藏起来。失败记录 + 修复路径比顺利成功更有面试价值。"],
-    interviewExplanation: "我完成了从桌面到 Android IL2CPP 的完整 native 边界验证闭环。",
-    nextRisk: "Act II 的确定性内核在迷雾后等你。休整、展示、然后启程。",
-    unlocks: ["m13"],
-    estimate: "20–30 分钟",
-    conceptMap: ["IL2CPP 构建结果", "阻塞点与修复路径", "STAR 故事", "ARM64 通行印", "Act I 闭幕"],
-    filesToCreate: ["不写新代码。", "构建结果记录（成或败）。", "阻塞点与修复路径讲解。", "可选：STAR 面试故事。"],
-    steps: [
-      "整理 M12 的完整链路记录（工具链 → 交叉编译 → 导入设置 → IL2CPP → 真机）。",
-      "把最大的阻塞点讲成『遇到什么 / 为什么 / 怎么解』。",
-      "让 AI 帮你把经历整理成 STAR 面试故事。",
-      "提交答辩，Act I 闭幕。",
-    ],
-    debuggingNotes: ["构建失败也能过门——门考的是记录与理解，不是运气。"],
-    publicShowcaseSeed: "从这里开始，简历可以写下『Unity/C++ Boundary & Runtime Tooling』——这枚印是整幕旅程的落款。",
-  },
-
-  // ------------------------------------------------------------
-  // M13 — 可选：XR 或渲染线程
-  // ------------------------------------------------------------
-  {
-    id: "m13",
-    code: "M13",
-    title: "可选：XR 或渲染线程",
-    regionId: "observatory_annex",
-    type: "main",
-    order: 20,
-    optional: true,
-    narrativeHook: "观测台的望远镜并不通向主路——但从这里能看见引擎更深处的风景。",
-    objective: "在核心桥梁稳固之后，添加 XR 模拟器位姿诊断或 render-thread 事件示例。",
-    whyItMatters:
-      "这是一次受控的好奇心释放：探索 engine/XR 相邻扩展点，同时证明你能守住架构边界——它不重写核心，也不取代主线。",
-    prerequisites: ["boss_mobile"],
-    definitionOfDone: [
-      "可选 demo 可运行。",
-      "文档解释局限性。",
-      "没有重写核心架构。",
-      "没有取代主线确定性仿真路径。",
-    ],
-    evidenceRequired: [
-      { id: "commit", type: "commit_hash", label: "Commit Hash", placeholder: "例如 a1b2c3d" },
-      { id: "demo_shot", type: "screenshot_note", label: "截图/GIF 路径", placeholder: "路径" },
-      {
-        id: "limitation",
-        type: "text_reflection",
-        label: "局限性说明",
-        placeholder: "这个 demo 能做什么、不能做什么",
-        multiline: true,
-      },
-      {
-        id: "linkedin_opt",
-        type: "linkedin_draft",
-        label: "可选 LinkedIn 草稿",
-        placeholder: "如果值得展示，写 3 句草稿",
-        multiline: true,
-        optional: true,
-      },
-    ],
-    skills: [],
-    artifactIds: ["art_m13"],
-    rewards: { xp: 200, gold: 100, skillPoints: 1, reputation: 15, insight: 0 },
-    aiPrompt: forgePrompt(
-      "M13",
-      "可选：XR 或渲染线程",
-      "在不改动核心架构的前提下，二选一：A) XR 模拟器位姿诊断 HUD（读取头显/手柄位姿并通过 native 通道记录）；B) GL.IssuePluginEvent / CommandBuffer.IssuePluginEvent 的 render-thread 事件最小示例。先帮我评估哪个与我的目标更相关。",
-    ),
-    resources: [
-      { label: "Unity — 底层 native 插件接口", url: "https://docs.unity3d.com/Manual/NativePluginInterface.html" },
-      { label: "Unity — XR", url: "https://docs.unity3d.com/Manual/XR.html" },
-    ],
-    commonTraps: ["把可选探索变成新的大项目。", "为了 demo 重构核心架构。"],
-    interviewExplanation: "我在核心桥梁稳固之后，探索了 engine/XR 相邻的扩展点。",
-    nextRisk: "Act I 全部完成。下一幕的入口将在学院公告中开启。",
-    unlocks: [],
-    estimate: "120–180 分钟",
-    conceptMap: [
-      "扩展点评估（XR vs render-thread）",
-      "最小 demo",
-      "局限性文档",
-      "架构边界不动",
-    ],
-    filesToCreate: [
-      "二选一：XR 位姿诊断 HUD 或 IssuePluginEvent 最小示例",
-      "docs 局限性说明（能做什么 / 不能做什么）",
-      "可选：截图/GIF",
-    ],
-    steps: [
-      "先评估：哪个方向与你的长期目标更相关（让 AI 帮你对比）。",
-      "实现最小 demo，严禁触碰核心架构。",
-      "写局限性文档：这个 demo 的边界在哪里。",
-      "可选：截一张值得展示的图。",
-      "提交证据，为 Act I 画上句号。",
-    ],
-    debuggingNotes: [
-      "发现自己在重构核心：立即停手——这正是本任务考验的自律。",
-      "render-thread 事件不触发：确认在 CommandBuffer / GL.IssuePluginEvent 的正确时机注册。",
-    ],
-    publicShowcaseSeed: "『核心稳固之后我才允许自己碰 XR』的克制叙事，本身就是资深工程师 signature 的展示素材。",
   },
 
   // ============================================================
@@ -2075,7 +1401,7 @@ export const QUESTS: Quest[] = [
     narrativeHook: "那些让你加班的夜晚不是白熬的——它们是别人没有的地图。",
     objective: "提取移动生产中的真实摩擦主题：SDK 集成、平台构建、生命周期差异、内存/性能、工具链。",
     whyItMatters:
-      "移动生产摩擦 × native 边界能力，是你未来最稀缺的组合卖点。M12（Android IL2CPP）会直接用到这张摩擦地图。",
+      "移动生产摩擦 × 仿真基础设施能力，是你未来最稀缺的组合卖点。生产交付的摩擦直觉——构建链、平台差异、真机验证——正是仿真行业面试里『能落地』的证据。",
     prerequisites: ["q_r0"],
     definitionOfDone: [
       "列出 5–8 个摩擦主题，每个附一个真实案例（可公开语言）。",

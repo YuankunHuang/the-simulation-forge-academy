@@ -53,7 +53,7 @@ export interface Quest {
   type: QuestType;
   /** 全世界线性顺序，用于推荐与“继续冒险” */
   order: number;
-  /** 可选支线（如 M13、生产经验营地），不阻塞主线推荐 */
+  /** 可选支线（如生产经验营地），不阻塞主线推荐 */
   optional?: boolean;
   narrativeHook: string;
   objective: string;

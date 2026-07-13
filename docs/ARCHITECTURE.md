@@ -29,7 +29,7 @@ features/*（页面组件） ←──────────── components/
 | 引擎 | 输入 | 输出 | 关键规则 |
 | --- | --- | --- | --- |
 | `unlockEngine` | completedIds | 区域三态、任务状态、Boss 清单 | 线性区域门控 `REGION_GATES`；第一个未解锁区域 = 剪影预览，其后全部迷雾；Act II/III 无门 = 永锁 |
-| `questEngine` | completedIds, fields | 推荐任务、完成资格、下一任务 | 可选任务（M13）只在主线清空后推荐；资格 = 状态可接 ∧ 必填证据齐全 |
+| `questEngine` | completedIds, fields | 推荐任务、完成资格、下一任务 | 可选任务（营地支线）只在主线清空后推荐；资格 = 状态可接 ∧ 必填证据齐全 |
 | `rewardEngine` | quest, fields | RewardBundle、神器、称号、等级 | 反思 ≥60/200 字 → +1/+2 洞察；展示型证据 ≥80 字 → +5 声望；称号阶梯由里程碑驱动 |
 | `reviewEngine` | states, completedIds, today | 到期卡、评分后的新状态、热身卡 | SM-2 简化版；卡片在关联任务完成后入组；热身优先「到期老卡 > 本任务预习卡」 |
 | `evidenceEngine` | quest, fields | 校验结果、展示 prompts | 必填字段非空白；commit hash ≥6 字符；神器 → 五类展示内容 |

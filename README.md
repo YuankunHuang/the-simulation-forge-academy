@@ -1,11 +1,13 @@
 # 仿真铸造学院 · The Simulation Forge Academy
 
-> A personal career RPG for becoming a deterministic realtime simulation engineer.
-> 一座属于你的职业转型 RPG 学院：从 Unity 生产工程师，到确定性实时仿真基础设施工程师。
+> A personal career RPG for becoming a trusted simulation infrastructure engineer.
+> 一座属于你的职业转型 RPG 学院：从 Unity 生产工程师，先桥接进入仿真行业，再走向可信仿真基础设施工程师。
 
 这是一个**私人、单机、本地优先**的游戏化职业转型系统。它不是待办清单，不是课程追踪器——它是一个温暖的学院驾驶舱：每天打开它，你就知道自己在哪里、今天做什么、为什么做、做到什么程度算完成、以及产出了什么职业证据。
 
 核心规则：**无证据，无精通 XP（No artifact, no mastery XP）。**
+
+> **战略修订（2026-07）**：北极星已从「确定性实时仿真工程师」修正为「可信仿真基础设施工程师」——确定性是核心工程方法，不是终局职位。路线现在分阶段推进：Unity Native Boundary Lab 降级为支撑性证据，主线在基准测试平原的试炼之门（Public Demo Slice）止步收工；旧 M9-M13（内存布局/安全边界/UPM 打包/Android/XR）服务于已废弃的「Unity native/SDK/tools 职业锚点」叙事，已整体删除。Act II 重铸为「应用物理学徒」，Act III 重铸为「可复现性工匠」，对齐 `documents/career-strategy.md` 的学习优先级：应用刚体物理 → MuJoCo/Isaac Lab 实践 → 可复现性/回归工件 → Docker 容器化。详见 `docs/CHANGELOG.md`。
 
 ## 功能总览
 
@@ -15,14 +17,14 @@
 | 征程地图 | 主线三幕 + 营地支线 + 战争迷雾：当前区域全开，下一区域剪影，远方藏雾 |
 | 工坊（任务详情） | 十六段结构：叙事、目标、概念链、产物清单、执行计划、DoD、证据表单、AI Prompt、常见陷阱、调试笔记、禁止事项、展示种子；核心段常驻、参考段折叠 |
 | Boss 之门 | 区域出口答辩：证据齐全 + 亲口讲清才能过门；每门铸一枚之印神器，答辩全文存入日志作面试防线 |
-| 证据宝库 | 23 件神器（Common → Legendary），每件附 LinkedIn/博客/作品集/简历/面试建议 |
-| 技能树 | 六棵树、证据驱动解锁：先用任务证明，再花技能点点亮 |
+| 证据宝库 | 14 件神器（Common → Legendary），每件附 LinkedIn/博客/作品集/简历/面试建议 |
+| 技能树 | 七棵树、证据驱动解锁：先用任务证明，再花技能点点亮 |
 | 复习卡组 | 简化间隔重复（四档评分），任务完成后知识卡自动入组 |
 | 秘境商店 | 金币购买可选的小型作品集项目（含调试哥布林竞技场等 7 座），永不阻塞主线 |
 | 深度冲刺 | 状态好时连推多关，结束生成 Session Recap |
 | 篝火日志 | 冒险历史、反思与 Boss 答辩、冲刺回顾、展示草稿、存档导出/导入 |
 
-种子内容：**Unity Native Boundary Lab** 项目的 R0 + M0–M13 全部里程碑、6 座 Boss 之门，以及可选的**生产经验营地**（Act 0 支线，B1–B6：把 5 年 Unity 生产经验变成显性证据）。Act I 全线任务均具备工坊级深度（概念链/产物清单/执行计划/调试笔记/展示种子），但解锁节奏不变：未到达的区域仍按迷雾与 Boss 门控逐步开放，Act II/III 藏于迷雾。
+种子内容：**Unity Native Boundary Lab** 项目的 R0 + M0–M8 里程碑与 2 座 Boss 之门。Act I 主线到「基准测试平原」为止（M4–M8 + `boss_benchmark`）——通过试炼之门即完成 Public Demo Slice，主线到此收工。另有可选的**生产经验营地**（Act 0 支线，B1–B6：把 5 年 Unity 生产经验变成显性证据）。Act II（应用物理学徒）与 Act III（可复现性工匠）目前仅为地图剪影，藏于迷雾，内容将在 Act I 主线收工后铸造。
 
 ## 快速开始
 
@@ -71,10 +73,10 @@ npm run worker:dev                              # 本地联调 Worker（先 buil
 
 | 文件 | 内容 |
 | --- | --- |
-| `quests.ts` | 任务（R0、M0–M13、Boss 之门）：叙事、DoD、证据要求、奖励、AI Prompt 等 |
+| `quests.ts` | 任务（R0、M0–M8、Boss 之门、营地 B1–B6）：叙事、DoD、证据要求、奖励、AI Prompt 等 |
 | `campaigns.ts` | 三幕战役与区域（名称、氛围、顺序） |
 | `artifacts.ts` | 证据神器与五类展示建议 |
-| `skills.ts` | 六棵技能树与节点（证据来源任务） |
+| `skills.ts` | 七棵技能树与节点（证据来源任务） |
 | `reviewCards.ts` | 复习卡（问题/答案/关联任务） |
 | `bonusDungeons.ts` | 秘境（费用、前置、范围简报） |
 | `npcDialogues.ts` | 米拉导师台词库 |
@@ -101,7 +103,7 @@ src/
   store/      Zustand 存档 + localStorage 持久化 + 导出/导入
   types/      领域模型
   lib/        日期 / id / 格式化工具
-  tests/      引擎单元测试 + 内容完整性守卫（74 个用例）
+  tests/      引擎单元测试 + 内容完整性守卫（97 个用例）
 ```
 
 架构细节见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，版本变更见 [docs/CHANGELOG.md](docs/CHANGELOG.md)。

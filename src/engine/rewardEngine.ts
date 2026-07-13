@@ -111,8 +111,6 @@ const TITLE_LADDER: Array<{ questId: string; title: string; titleEn: string }> =
   { questId: "m2", title: "原生信号学徒", titleEn: "Native Signal Apprentice" },
   { questId: "boss_bridge", title: "互操作桥匠", titleEn: "Interop Bridgewright" },
   { questId: "boss_benchmark", title: "边界基准工程师", titleEn: "Boundary Benchmark Builder" },
-  { questId: "boss_package", title: "运行时工具专家", titleEn: "Runtime Tooling Adept" },
-  { questId: "boss_mobile", title: "C++ 内核学徒", titleEn: "C++ Kernel Apprentice" },
 ];
 
 export const STARTING_TITLE = { title: "Unity 生产工程师", titleEn: "Unity Production Engineer" };

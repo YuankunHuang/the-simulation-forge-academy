@@ -13,18 +13,15 @@ describe("questEngine · 今日推荐", () => {
     expect(getRecommendedQuest(["q_r0", "m0", "m1", "m2", "m3"])?.id).toBe("boss_bridge");
   });
 
-  it("可选任务（M13 / 营地）只在主线清空后推荐", () => {
-    const beforeM13 = [
+  it("营地支线只在主线清空后推荐", () => {
+    const mainlineDone = [
       "q_r0", "m0", "m1", "m2", "m3", "boss_bridge",
       "m4", "m5", "m6", "m7", "m8", "boss_benchmark",
-      "m9", "boss_layout", "m10", "boss_safety",
-      "m11", "boss_package", "m12", "boss_mobile",
     ];
-    expect(getRecommendedQuest(beforeM13)?.id).toBe("m13");
-    // M13 之后仍有营地支线可做
-    expect(getRecommendedQuest([...beforeM13, "m13"])?.id).toBe("b1");
+    // 主线收官后推荐转向营地支线
+    expect(getRecommendedQuest(mainlineDone)?.id).toBe("b1");
     // 营地也全部完成后才真正无事可做
-    const everything = [...beforeM13, "m13", "b1", "b2", "b3", "b4", "b5", "b6"];
+    const everything = [...mainlineDone, "b1", "b2", "b3", "b4", "b5", "b6"];
     expect(getRecommendedQuest(everything)).toBeNull();
   });
 
@@ -51,7 +48,7 @@ describe("questEngine · 完成资格", () => {
 
   it("状态可接且证据齐全时可完成（可选反思不阻塞）", () => {
     const result = canCompleteQuest(QUEST_BY_ID.q_r0, [], {
-      intention: "我正在从 Unity 生产工程师转向确定性仿真基础设施工程师。",
+      intention: "我正在从 Unity 生产工程师，先桥接进入仿真行业，再走向可信仿真基础设施工程师。",
       main_project: "Unity Native Boundary Lab",
     });
     expect(result.ok).toBe(true);

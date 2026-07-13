@@ -151,61 +151,6 @@ export const NPC_DIALOGUES: NPCDialogue[] = [
     questId: "boss_benchmark",
     text: "四种模式都在了。现在证明你的数字凭什么让人相信——这将是你第一件公开的证据。",
   },
-  {
-    id: "d_focus_m9",
-    context: "quest_focus",
-    questId: "m9",
-    text: "数据的形状决定它旅行的速度。今天把布局、对齐和指针的规则写成可对比的表格。",
-  },
-  {
-    id: "d_focus_boss_layout",
-    context: "quest_focus",
-    questId: "boss_layout",
-    text: "把学到的布局法则盖上你自己的印章。答辩要的不是术语，是判断标准。",
-  },
-  {
-    id: "d_focus_m10",
-    context: "quest_focus",
-    questId: "m10",
-    text: "失败不可怕，不可恢复的失败才可怕。今天给每个错误一个名字和一个出口。",
-  },
-  {
-    id: "d_focus_boss_safety",
-    context: "quest_focus",
-    questId: "boss_safety",
-    text: "描述一次你亲手治愈的失败。这是系统工程面试里最值钱的故事。",
-  },
-  {
-    id: "d_focus_m11",
-    context: "quest_focus",
-    questId: "m11",
-    text: "从『我的场景能跑』到『任何人 import 就能跑』。今天把实验室装箱、贴标、可追溯。",
-  },
-  {
-    id: "d_focus_boss_package",
-    context: "quest_focus",
-    questId: "boss_package",
-    text: "港务长只问一句：换一台船，还能开吗？用陌生人的眼睛审视你的包。",
-  },
-  {
-    id: "d_focus_m12",
-    context: "quest_focus",
-    questId: "m12",
-    text: "回到你最熟悉的战场——这次带着 native 武器。ARM64 与 IL2CPP 在门后等你。",
-  },
-  {
-    id: "d_focus_boss_mobile",
-    context: "quest_focus",
-    questId: "boss_mobile",
-    text: "门后是你来时的世界。讲清移动端边界的特殊约束，Act I 就在此闭幕。",
-  },
-  {
-    id: "d_focus_m13",
-    context: "quest_focus",
-    questId: "m13",
-    text: "望远镜只借给守得住主线的人。选一扇窗，看一眼引擎深处，然后回来。",
-  },
-
   // ---- Boss 之门在前 ----
   {
     id: "d_boss_1",
@@ -255,36 +200,6 @@ export const NPC_DIALOGUES: NPCDialogue[] = [
     context: "region_flavor",
     regionId: "benchmark_plains",
     text: "平原的风只尊重数据。固定 seed，剔除 warmup，让 median 和 p95 替你说话。",
-  },
-  {
-    id: "d_region_archives",
-    context: "region_flavor",
-    regionId: "layout_archives",
-    text: "档案馆的规矩：数据的形状决定它旅行的速度。对齐不是细节，是契约。",
-  },
-  {
-    id: "d_region_clinic",
-    context: "region_flavor",
-    regionId: "safety_clinic",
-    text: "诊所信条：失败不可怕，不可恢复的失败才可怕。让每个错误都有名字、有出口。",
-  },
-  {
-    id: "d_region_harbor",
-    context: "region_flavor",
-    regionId: "package_harbor",
-    text: "港口标准很简单：换一台船还能开，换一个工程还能跑。",
-  },
-  {
-    id: "d_region_gate",
-    context: "region_flavor",
-    regionId: "mobile_gate",
-    text: "这是你最熟悉的战场。带着新的武器回去，让老经验和新能力握手。",
-  },
-  {
-    id: "d_region_observatory",
-    context: "region_flavor",
-    regionId: "observatory_annex",
-    text: "望远镜可以看很远，但脚要站在稳固的桥上。可选的风景，克制地欣赏。",
   },
   {
     id: "d_region_basecamp",

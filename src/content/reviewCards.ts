@@ -205,15 +205,6 @@ export const REVIEW_CARDS: ReviewCard[] = [
     difficulty: 2,
   },
   {
-    id: "card_pack1",
-    prompt: "为什么 Pack=1 不是免费的优化？",
-    answer:
-      "紧凑布局可能导致未对齐访问，在部分平台上更慢甚至非法。对齐是 CPU 访问效率的契约，压缩尺寸要以测量为依据。",
-    questId: "m9",
-    skillId: "skill_memory_layout",
-    difficulty: 3,
-  },
-  {
     id: "card_batching",
     prompt: "批处理为什么能降低边界成本？",
     answer:
@@ -221,69 +212,6 @@ export const REVIEW_CARDS: ReviewCard[] = [
     questId: "m5",
     skillId: "skill_hot_path",
     difficulty: 1,
-  },
-  {
-    id: "card_result_code",
-    prompt: "跨 ABI 的错误处理为什么用 ResultCode 而不是异常？",
-    answer:
-      "C++ 异常机制是编译器特定的，跨 ABI 抛出是未定义行为。返回码 + LastError 查询是稳定且可预测的失败通道。",
-    questId: "m10",
-    skillId: "skill_result_code",
-    difficulty: 2,
-  },
-  {
-    id: "card_aos_soa",
-    prompt: "什么时候选 AoS，什么时候选 SoA？",
-    answer:
-      "按访问模式决定：整实体一起读写（游戏对象逻辑）→ AoS；按字段批量处理、追求缓存行利用与向量化（仿真热路径）→ SoA。跨边界时还要加上双侧布局一致性与转换成本的考量。",
-    questId: "m9",
-    skillId: "skill_memory_layout",
-    difficulty: 2,
-  },
-  {
-    id: "card_asmdef",
-    prompt: "asmdef（Assembly Definition）解决什么问题？",
-    answer:
-      "把代码划分成独立编译单元：控制引用方向（Editor 引 Runtime 单向）、限定目标平台、加速增量编译，并防止 Editor 代码泄漏进玩家构建。",
-    questId: "m11",
-    skillId: "skill_upm",
-    difficulty: 1,
-  },
-  {
-    id: "card_samples_tilde",
-    prompt: "UPM 包的示例为什么放在 Samples~（带波浪号）目录？",
-    answer:
-      "尾缀 ~ 让 Unity 不导入该目录内容；用户在 Package Manager 里按需把 sample 拷贝进自己的工程。包本体保持干净，示例不污染 Runtime。",
-    questId: "m11",
-    skillId: "skill_upm",
-    difficulty: 1,
-  },
-  {
-    id: "card_il2cpp",
-    prompt: "IL2CPP 与 Mono 的关键区别是什么？为什么要在 IL2CPP 下重新验证 P/Invoke？",
-    answer:
-      "IL2CPP 把 IL 提前（AOT）编译成 C++ 再编成原生码：无 JIT、反射与动态代码受限、DllImport 在构建期做静态检查。Editor（Mono）能跑不代表 IL2CPP 真机能跑，必须重新验证。",
-    questId: "m12",
-    skillId: "skill_import_settings",
-    difficulty: 2,
-  },
-  {
-    id: "card_abi_dir",
-    prompt: "Android native 插件为什么必须放进 arm64-v8a 这样的 ABI 目录？",
-    answer:
-      "Unity 按 ABI 目录为每种 CPU 架构挑选 .so 打进 APK。目录放错或架构不匹配时库不会被打包/加载，表现为真机 DllNotFoundException——而 Editor 完全正常。",
-    questId: "m12",
-    skillId: "skill_import_settings",
-    difficulty: 2,
-  },
-  {
-    id: "card_borrowed_ptr",
-    prompt: "native 侧借用 Unity 传入的指针时，最重要的规则是什么？",
-    answer:
-      "不得在调用结束后保留（retain）借来的指针。托管内存可能被 GC 移动或释放，越界持有会导致悬垂指针。",
-    questId: "m9",
-    skillId: "skill_unsafe_ptr",
-    difficulty: 3,
   },
 ];
 

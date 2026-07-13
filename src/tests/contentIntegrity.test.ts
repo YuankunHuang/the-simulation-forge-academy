@@ -126,7 +126,7 @@ describe("内容完整性 · Act I 全线深度", () => {
 
   it("每座 Boss 之门都铸成一枚之印神器", () => {
     const bosses = QUESTS.filter((q) => q.type === "boss");
-    expect(bosses.length).toBe(6);
+    expect(bosses.length).toBe(2);
     for (const boss of bosses) {
       expect(boss.artifactIds.length, `${boss.id} 应产出之印`).toBe(1);
       const artifact = ARTIFACT_BY_ID[boss.artifactIds[0]];
